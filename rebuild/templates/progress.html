@@ -1,0 +1,385 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="content-area">
+    <h1 class="mb-4">Your Progress</h1>
+    
+    <!-- Summary Metrics -->
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <div class="metric-card">
+                <div class="metric-value">Intermediate</div>
+                <div class="metric-label">Reading Level</div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="metric-card">
+                <div class="metric-value">{{ streak_count }}</div>
+                <div class="metric-label">Daily Streak</div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="metric-card">
+                <div class="metric-value">42</div>
+                <div class="metric-label">Exercises Completed</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Progress Charts -->
+    <div class="card mb-5">
+        <div class="card-body">
+            <h2 class="mb-4">Progress Over Time</h2>
+            
+            <!-- Tabs for different chart types -->
+            <ul class="nav nav-tabs mb-4" id="progressTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="reading-tab" data-bs-toggle="tab" 
+                            data-bs-target="#reading-tab-pane" type="button" role="tab">
+                        Reading Progress
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="writing-tab" data-bs-toggle="tab" 
+                            data-bs-target="#writing-tab-pane" type="button" role="tab">
+                        Writing Progress
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="activity-tab" data-bs-toggle="tab" 
+                            data-bs-target="#activity-tab-pane" type="button" role="tab">
+                        Activity Heatmap
+                    </button>
+                </li>
+            </ul>
+            
+            <!-- Tab content -->
+            <div class="tab-content" id="progressTabsContent">
+                <!-- Reading Progress Tab -->
+                <div class="tab-pane fade show active" id="reading-tab-pane" role="tabpanel" tabindex="0">
+                    <div id="reading-accuracy-chart" style="height: 400px;"></div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div id="reading-wpm-chart" style="height: 300px;"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="reading-fluency-chart" style="height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Writing Progress Tab -->
+                <div class="tab-pane fade" id="writing-tab-pane" role="tabpanel" tabindex="0">
+                    <div id="writing-accuracy-chart" style="height: 400px;"></div>
+                    
+                    <h3 class="mt-4 mb-3">Common Error Types</h3>
+                    <div id="error-types-chart" style="height: 300px;"></div>
+                </div>
+                
+                <!-- Activity Heatmap Tab -->
+                <div class="tab-pane fade" id="activity-tab-pane" role="tabpanel" tabindex="0">
+                    <div id="activity-heatmap" style="height: 400px;"></div>
+                    
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-lightbulb me-2"></i> Tip: Regular practice is key to literacy improvement. Try to complete at least one exercise every day!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activities -->
+    <div class="card mb-5">
+        <div class="card-body">
+            <h2 class="mb-4">Recent Activities</h2>
+            
+            <div id="activities-container">
+                {% for activity in activities %}
+                <div class="activity-item">
+                    <span class="activity-date">{{ activity.date }}</span>: {{ activity.description }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Focus Areas -->
+    <div class="card">
+        <div class="card-body">
+            <h2 class="mb-4">Focus Areas</h2>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h3 class="mb-3">Reading</h3>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <i class="fas fa-arrow-right text-primary me-2"></i> Long word pronunciation
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-arrow-right text-primary me-2"></i> Reading speed consistency
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-arrow-right text-primary me-2"></i> Expression and intonation
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-6">
+                    <h3 class="mb-3">Writing</h3>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <i class="fas fa-arrow-right text-primary me-2"></i> Spelling words with silent letters
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-arrow-right text-primary me-2"></i> Subject-verb agreement
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-arrow-right text-primary me-2"></i> Homophones (their/there/they're)
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fetch progress data from server
+        fetch('/get_progress_data')
+            .then(response => response.json())
+            .then(data => {
+                createReadingCharts(data);
+                createWritingCharts(data);
+                createActivityHeatmap(data);
+            })
+            .catch(error => {
+                console.error('Error fetching progress data:', error);
+            });
+    });
+    
+    function createReadingCharts(data) {
+        // Reading Accuracy Chart
+        const accuracyTrace = {
+            x: data.dates,
+            y: data.reading.accuracy,
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Accuracy',
+            line: {
+                color: '#4b7bec',
+                width: 3
+            },
+            marker: {
+                size: 8,
+                color: '#4b7bec'
+            }
+        };
+        
+        const accuracyLayout = {
+            title: 'Reading Accuracy Over Time',
+            xaxis: {
+                title: 'Date'
+            },
+            yaxis: {
+                title: 'Accuracy (%)',
+                range: [60, 100]
+            },
+            margin: {
+                l: 60,
+                r: 40,
+                b: 60,
+                t: 60
+            }
+        };
+        
+        Plotly.newPlot('reading-accuracy-chart', [accuracyTrace], accuracyLayout);
+        
+        // Reading Speed Chart
+        const wpmTrace = {
+            x: data.dates,
+            y: data.reading.words_per_minute,
+            type: 'bar',
+            marker: {
+                color: '#3867d6'
+            }
+        };
+        
+        const wpmLayout = {
+            title: 'Reading Speed (WPM)',
+            xaxis: {
+                title: 'Date'
+            },
+            yaxis: {
+                title: 'Words Per Minute'
+            },
+            margin: {
+                l: 60,
+                r: 40,
+                b: 60,
+                t: 60
+            }
+        };
+        
+        Plotly.newPlot('reading-wpm-chart', [wpmTrace], wpmLayout);
+        
+        // Fluency Score Chart
+        const fluencyTrace = {
+            x: data.dates,
+            y: data.reading.fluency_score,
+            type: 'scatter',
+            mode: 'lines+markers',
+            line: {
+                color: '#20bf6b',
+                width: 2
+            },
+            marker: {
+                size: 6,
+                color: '#20bf6b'
+            }
+        };
+        
+        const fluencyLayout = {
+            title: 'Reading Fluency Score',
+            xaxis: {
+                title: 'Date'
+            },
+            yaxis: {
+                title: 'Fluency Score',
+                range: [60, 100]
+            },
+            margin: {
+                l: 60,
+                r: 40,
+                b: 60,
+                t: 60
+            }
+        };
+        
+        Plotly.newPlot('reading-fluency-chart', [fluencyTrace], fluencyLayout);
+    }
+    
+    function createWritingCharts(data) {
+        // Writing Accuracy Chart
+        const spellingTrace = {
+            x: data.dates,
+            y: data.writing.spelling_accuracy,
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Spelling Accuracy',
+            line: {
+                color: '#eb3b5a',
+                width: 3
+            },
+            marker: {
+                size: 8,
+                color: '#eb3b5a'
+            }
+        };
+        
+        const spellingLayout = {
+            title: 'Spelling Accuracy Over Time',
+            xaxis: {
+                title: 'Date'
+            },
+            yaxis: {
+                title: 'Accuracy (%)',
+                range: [60, 100]
+            },
+            margin: {
+                l: 60,
+                r: 40,
+                b: 60,
+                t: 60
+            }
+        };
+        
+        Plotly.newPlot('writing-accuracy-chart', [spellingTrace], spellingLayout);
+        
+        // Error Types Chart
+        const errorTypes = ['Silent Letters', 'Double Consonants', 'Vowel Combinations', 'Homophones', 'Suffixes'];
+        const errorCounts = [8, 5, 12, 7, 3];
+        
+        const errorTrace = {
+            x: errorTypes,
+            y: errorCounts,
+            type: 'bar',
+            marker: {
+                color: ['#fd9644', '#26de81', '#4b7bec', '#a55eea', '#778ca3']
+            }
+        };
+        
+        const errorLayout = {
+            title: 'Common Error Types',
+            xaxis: {
+                title: 'Error Type'
+            },
+            yaxis: {
+                title: 'Frequency'
+            },
+            margin: {
+                l: 60,
+                r: 40,
+                b: 60,
+                t: 60
+            }
+        };
+        
+        Plotly.newPlot('error-types-chart', [errorTrace], errorLayout);
+    }
+    
+    function createActivityHeatmap(data) {
+        // Generate activity data for heatmap
+        // In a real app, this would come from the server
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'];
+        
+        // Generate random activity data
+        const activityData = [];
+        for (let i = 0; i < days.length; i++) {
+            const row = [];
+            for (let j = 0; j < weeks.length; j++) {
+                // Higher probability of activity on weekdays
+                if (i < 5) {
+                    row.push(Math.floor(Math.random() * 4)); // 0-3 activities
+                } else {
+                    // Less activity on weekends
+                    row.push(Math.floor(Math.random() * 2)); // 0-1 activities
+                }
+            }
+            activityData.push(row);
+        }
+        
+        const heatmapTrace = {
+            z: activityData,
+            x: weeks,
+            y: days,
+            type: 'heatmap',
+            colorscale: [
+                [0, '#f1f2f6'],
+                [0.25, '#bdd2ff'],
+                [0.5, '#88acff'],
+                [0.75, '#5885ff'],
+                [1, '#4b7bec']
+            ]
+        };
+        
+        const heatmapLayout = {
+            title: 'Your Activity Calendar (Last 6 Weeks)',
+            margin: {
+                l: 60,
+                r: 40,
+                b: 60,
+                t: 60
+            }
+        };
+        
+        Plotly.newPlot('activity-heatmap', [heatmapTrace], heatmapLayout);
+    }
+</script>
+{% endblock %} 

@@ -1,0 +1,1467 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<!-- Include the passages.js script -->
+<script src="/static/js/passages.js"></script>
+<style>
+  .difficulty-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+  
+  .difficulty-btn {
+    display: inline-block;
+    padding: 10px 16px;
+    border-radius: 50px;
+    background-color: #f0f0f0;
+    color: #333;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border: 2px solid transparent;
+  }
+  
+  .difficulty-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+  
+  .difficulty-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--secondary-color);
+  }
+  
+  .beginner-btn { background-color: #e8f5e9; }
+  .beginner-btn.active { background-color: #26a69a; }
+  
+  .elementary-btn { background-color: #e3f2fd; }
+  .elementary-btn.active { background-color: #42a5f5; }
+  
+  .intermediate-btn { background-color: #e8eaf6; }
+  .intermediate-btn.active { background-color: #5c6bc0; }
+  
+  .advanced-btn { background-color: #fff8e1; }
+  .advanced-btn.active { background-color: #ffb300; }
+  
+  .expert-btn { background-color: #ffebee; }
+  .expert-btn.active { background-color: #ef5350; }
+  
+  #reading-passage {
+    font-size: 1.25rem;
+    line-height: 1.9;
+    background-color: #f9f9fd;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+  }
+  
+  #recording-indicator {
+    color: var(--danger-color);
+    animation: pulse 1.5s infinite;
+    font-weight: bold;
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+  
+  .btn-record {
+    padding: 12px 25px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  
+  .btn-record:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+  }
+  
+  .live-transcription-container {
+    background-color: #f9f9fd;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+    min-height: 100px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+  }
+  
+  .analysis-list {
+    padding-left: 0;
+    list-style-type: none;
+  }
+  
+  .analysis-item {
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background-color: #f8f9fa;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: flex-start;
+  }
+  
+  .analysis-item i {
+    margin-right: 10px;
+    margin-top: 3px;
+    color: var(--primary-color);
+  }
+  
+  .badge-pass {
+    background-color: var(--success-color);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 50px;
+    font-weight: 500;
+    margin-left: 10px;
+  }
+  
+  .badge-retry {
+    background-color: var(--warning-color);
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 50px;
+    font-weight: 500;
+    margin-left: 10px;
+  }
+
+  .accuracy-container {
+    position: relative;
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    margin-bottom: 1.5rem;
+  }
+  
+  .accuracy-percentage {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .accuracy-bar {
+    height: 15px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #e0e0e0;
+  }
+  
+  .accuracy-progress {
+    height: 100%;
+    background-color: var(--success-color);
+    transition: width 0.5s ease;
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.5s ease;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-area">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Reading Practice</h1>
+    <p id="recording-indicator" class="d-none mb-0"><i class="fas fa-microphone"></i> Recording...</p>
+  </div>
+  
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title mb-3">Select Difficulty Level</h5>
+      
+      <div class="difficulty-selector">
+        <div id="beginner-btn" class="difficulty-btn beginner-btn">
+          <i class="fas fa-baby"></i> Beginner
+        </div>
+        <div id="elementary-btn" class="difficulty-btn elementary-btn">
+          <i class="fas fa-child"></i> Elementary
+        </div>
+        <div id="intermediate-btn" class="difficulty-btn intermediate-btn active">
+          <i class="fas fa-user"></i> Intermediate
+        </div>
+        <div id="advanced-btn" class="difficulty-btn advanced-btn">
+          <i class="fas fa-user-graduate"></i> Advanced
+        </div>
+        <div id="expert-btn" class="difficulty-btn expert-btn">
+          <i class="fas fa-brain"></i> Expert
+        </div>
+      </div>
+      
+      <div id="difficulty-description" class="text-muted small">
+        <i class="fas fa-info-circle"></i> 
+        Intermediate: Suitable for readers comfortable with everyday vocabulary and simple sentences.
+      </div>
+      
+      <button id="generate-btn" class="btn btn-primary mt-3">
+        <i class="fas fa-sync-alt"></i> Generate New Passage
+      </button>
+    </div>
+  </div>
+  
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 id="passage-title" class="card-title">Reading Passage</h5>
+      <div id="reading-passage" class="mb-3">Loading passage...</div>
+      
+      <div class="d-flex justify-content-center">
+        <button id="simple-record-btn" class="btn btn-success btn-record">
+          <i class="fas fa-microphone"></i> Start Reading
+        </button>
+      </div>
+      
+      <div class="live-transcription-container">
+        <h6><i class="fas fa-comment-alt"></i> Your Speech</h6>
+        <div id="live-transcription" class="mt-2">Ready to record your reading...</div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="analysis-card" class="card d-none fade-in">
+    <div class="card-body">
+      <h5 class="card-title">Reading Analysis</h5>
+      
+      <div class="accuracy-container">
+        <div class="accuracy-percentage">
+          <span id="accuracy-percentage">0%</span>
+          <span id="pass-badge" class="badge-pass d-none">PASS</span>
+          <span id="retry-badge" class="badge-retry d-none">TRY AGAIN</span>
+        </div>
+        <div class="accuracy-bar">
+          <div id="accuracy-meter" class="accuracy-progress" style="width: 0%"></div>
+        </div>
+        <div class="text-center mt-2 text-muted small">70% or higher is a passing score</div>
+      </div>
+      
+      <div class="row">
+        <div class="col-md-6">
+          <h6><i class="fas fa-star"></i> Strengths</h6>
+          <ul id="strengths-list" class="analysis-list">
+            <li class="analysis-item"><i class="fas fa-check-circle"></i> Analyzing your reading...</li>
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <h6><i class="fas fa-flag"></i> Areas to Improve</h6>
+          <ul id="improvements-list" class="analysis-list">
+            <li class="analysis-item"><i class="fas fa-exclamation-circle"></i> Analyzing your reading...</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="d-flex gap-2 mt-4">
+        <button id="try-again-btn" class="btn btn-primary">
+          <i class="fas fa-redo"></i> Try Again
+        </button>
+        <button id="next-passage-btn" class="btn btn-success d-none">
+          <i class="fas fa-arrow-right"></i> Next Passage
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="milestone-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-trophy me-2"></i>
+          <span id="milestone-title">Achievement Unlocked!</span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <div class="achievement-icon mb-3">
+          <i id="milestone-icon" class="fas fa-star fa-4x text-warning"></i>
+        </div>
+        <h4 id="milestone-name" class="mb-2">Achievement Name</h4>
+        <p id="milestone-description" class="text-muted">Achievement description goes here</p>
+        <div class="progress mt-3 mb-2">
+          <div id="milestone-progress" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+        </div>
+        <div class="d-flex justify-content-between">
+          <small>Progress</small>
+          <small id="milestone-progress-text">0/1</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="level-up-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-arrow-up me-2"></i>
+          Level Up!
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <div class="level-icon mb-3">
+          <i class="fas fa-crown fa-4x text-warning"></i>
+        </div>
+        <h4 class="mb-2">Congratulations!</h4>
+        <p>You've reached <span id="new-level" class="fw-bold">Level 2</span>!</p>
+        <p class="text-muted">New challenges await with more complex passages and vocabulary.</p>
+        
+        <div class="level-badge my-4 py-3 px-4 rounded bg-light">
+          <div class="d-flex align-items-center justify-content-center">
+            <span class="level-number me-3 fs-1 fw-bold text-success">2</span>
+            <div class="text-start">
+              <div class="level-name fw-bold">Apprentice Reader</div>
+              <small class="text-muted">5/10 passages completed</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Continue to Next Level</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Debug mode OFF
+  const DEBUG = false;
+  
+  // Helper for logging debug messages
+  function logDebug(message) {
+    if (DEBUG) {
+      console.log(`[DEBUG] ${message}`);
+    }
+  }
+  
+  // Basic variables
+  let currentPassage = "";
+  let currentDifficulty = "intermediate";
+  let recognition = null;
+  let isRecording = false;
+  let currentTranscript = "";
+  let specificPassage = "{{ requested_passage }}"; // Get requested passage from template
+  
+  // DOM elements
+  const passageTitle = document.getElementById('passage-title');
+  const passageElement = document.getElementById('reading-passage');
+  const liveTranscription = document.getElementById('live-transcription');
+  const recordBtn = document.getElementById('simple-record-btn');
+  const recordingIndicator = document.getElementById('recording-indicator');
+  const analysisCard = document.getElementById('analysis-card');
+  const accuracyMeter = document.getElementById('accuracy-meter');
+  const accuracyPercentage = document.getElementById('accuracy-percentage');
+  const strengthsList = document.getElementById('strengths-list');
+  const improvementsList = document.getElementById('improvements-list');
+  const tryAgainBtn = document.getElementById('try-again-btn');
+  const nextPassageBtn = document.getElementById('next-passage-btn');
+  const passBadge = document.getElementById('pass-badge');
+  const retryBadge = document.getElementById('retry-badge');
+  const difficultyDescription = document.getElementById('difficulty-description');
+  
+  // Expanded difficulty levels
+  const difficultyBtns = {
+    'beginner': document.getElementById('beginner-btn'),
+    'elementary': document.getElementById('elementary-btn'),
+    'intermediate': document.getElementById('intermediate-btn'),
+    'advanced': document.getElementById('advanced-btn'),
+    'expert': document.getElementById('expert-btn')
+  };
+  
+  const difficultyDescriptions = {
+    'beginner': 'Simple vocabulary and very short sentences. Ideal for early readers or language learners.',
+    'elementary': 'Basic vocabulary with short, straightforward sentences.',
+    'intermediate': 'Suitable for readers comfortable with everyday vocabulary and simple sentences.',
+    'advanced': 'More complex vocabulary and sentence structures for confident readers.',
+    'expert': 'Advanced vocabulary, complex sentences and academic language for skilled readers.'
+  };
+
+  // Enhanced fallback passages with shorter, focused content
+  const fallbackPassages = {
+    beginner: [
+      { 
+        title: "The Big Dog", 
+        passage: "The dog is big. It has brown fur. The dog likes to play in the park." 
+      },
+      {
+        title: "My Red Ball",
+        passage: "I have a red ball. It is round and bouncy. I like to throw it high."
+      }
+    ],
+    elementary: [
+      { 
+        title: "The Lost Cat", 
+        passage: "Tim lost his cat in the yard. He looked under bushes and called its name. Soon he heard a soft meow from the tree." 
+      },
+      {
+        title: "The New Bike",
+        passage: "Sara got a new bike for her birthday. It was blue with silver wheels. She rode it around the block twice."
+      }
+    ],
+    intermediate: [
+      { 
+        title: "The Mystery Box", 
+        passage: "Hannah found an old wooden box in her grandmother's attic. When she opened it, she discovered a collection of vintage photographs and a small golden key." 
+      },
+      {
+        title: "Ocean Adventure",
+        passage: "The waves crashed against the shore as Marco prepared his small boat. He had planned this ocean adventure for months and was eager to document marine life."
+      }
+    ],
+    advanced: [
+      { 
+        title: "The Unexpected Discovery", 
+        passage: "Professor Clark's archaeological excavation revealed an unprecedented artifact that contradicted existing historical theories. The inscriptions suggested a civilization far more advanced than previously believed." 
+      },
+      {
+        title: "Neuroplasticity Research",
+        passage: "Recent neuroplasticity research indicates that the brain can reorganize itself by forming new neural connections throughout life. This phenomenon challenges traditional notions of fixed cognitive development."
+      }
+    ],
+    expert: [
+      { 
+        title: "Quantum Computing Breakthrough", 
+        passage: "The paradigm-shifting quantum computing breakthrough demonstrates the feasibility of maintaining quantum coherence despite environmental decoherence. This development surmounts what was previously considered an insurmountable barrier in quantum information processing." 
+      },
+      {
+        title: "Socioeconomic Implications",
+        passage: "The socioeconomic implications of artificial intelligence proliferation necessitate a comprehensive reevaluation of educational and workforce development policies. Policymakers must address the impending obsolescence of numerous vocational categories."
+      }
+    ]
+  };
+  
+  // Set up difficulty buttons
+  Object.keys(difficultyBtns).forEach(level => {
+    difficultyBtns[level].addEventListener('click', function() {
+      // Reset all buttons
+      Object.values(difficultyBtns).forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Set active button
+      this.classList.add('active');
+      currentDifficulty = level;
+      
+      // Update description
+      difficultyDescription.innerHTML = `<i class="fas fa-info-circle"></i> ${level.charAt(0).toUpperCase() + level.slice(1)}: ${difficultyDescriptions[level]}`;
+      
+      // Reset any previous analysis
+      analysisCard.classList.add('d-none');
+      
+      // Reset the transcript
+      resetSpeechRecognition();
+      
+      // Load new passage
+      loadPassage(true); // true = force new passage
+    });
+  });
+  
+  // Generate new passage button
+  document.getElementById('generate-btn').addEventListener('click', function() {
+    loadPassage(true); // Force new passage
+    resetSpeechRecognition();
+  });
+  
+  // Try again button - completely reset the speech recognition
+  tryAgainBtn.addEventListener('click', function() {
+    resetSpeechRecognition();
+  });
+  
+  // Next passage button
+  nextPassageBtn.addEventListener('click', function() {
+    loadPassage(true); // Force new passage
+    resetSpeechRecognition();
+  });
+  
+  // Reset speech recognition state
+  function resetSpeechRecognition() {
+    // Stop any ongoing recording
+    if (isRecording) {
+      stopRecording();
+    }
+    
+    // Clear transcript and reset UI
+    currentTranscript = "";
+    liveTranscription.textContent = "Ready to record your reading...";
+    
+    // Hide analysis
+    analysisCard.classList.add('d-none');
+    
+    // Hide pass/retry badges
+    passBadge.classList.add('d-none');
+    retryBadge.classList.add('d-none');
+    nextPassageBtn.classList.add('d-none');
+  }
+  
+  // Toggle recording when button is clicked
+  recordBtn.addEventListener('click', function() {
+    logDebug(`Record button clicked. Current state: ${isRecording ? 'recording' : 'not recording'}`);
+    
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  });
+  
+  // Initialize speech recognition
+  function initSpeechRecognition() {
+    logDebug("Initializing speech recognition");
+    
+    // Feature detection
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert("Speech recognition not supported in your browser. Please try Chrome.");
+      return false;
+    }
+    
+    try {
+      // Create speech recognition instance
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      
+      // Configure recognition
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+      
+      // Store the transcript in a closure variable that will be reset when starting recording
+      let finalTranscript = '';
+      
+      // Method to reset transcript
+      recognition.resetTranscript = function() {
+        finalTranscript = '';
+        currentTranscript = '';
+        logDebug("Transcript reset");
+      };
+      
+      // Process results
+      recognition.onresult = function(event) {
+        logDebug(`Got speech result: ${event.results.length} results`);
+        
+        let interimTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          
+          if (event.results[i].isFinal) {
+            // Handle pauses better - add periods if needed
+            let processedTranscript = transcript;
+            
+            // If there's a noticeable pause (often transcribed with commas)
+            // We'll enhance this to insert periods for better sentence breaks
+            if (processedTranscript.includes(', ')) {
+              processedTranscript = processedTranscript.replace(/, /g, '. ');
+            }
+            
+            finalTranscript += processedTranscript + ' ';
+            currentTranscript = finalTranscript; // Save for analysis
+            logDebug(`Final transcript updated: ${finalTranscript.substring(0, 30)}...`);
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+        
+        // Display transcription with styling
+        liveTranscription.innerHTML = `<span style="color: #333; font-weight: normal;">${finalTranscript}</span>` + 
+          '<span style="color: gray; font-style: italic;">' + interimTranscript + '</span>';
+      };
+      
+      // Handle errors
+      recognition.onerror = function(event) {
+        logDebug(`Speech recognition error: ${event.error}`);
+        
+        if (event.error === 'not-allowed') {
+          alert("Microphone access denied. Please allow microphone access in your browser settings.");
+        } else if (event.error === 'network') {
+          alert("Network error occurred. Please check your internet connection.");
+        } else {
+          alert(`Speech recognition error: ${event.error}`);
+        }
+        
+        stopRecording();
+      };
+      
+      // Handle end of recognition
+      recognition.onend = function() {
+        logDebug("Speech recognition ended");
+        
+        // Only reset state if we're still supposed to be recording
+        // This handles the case where recognition ends unexpectedly
+        if (isRecording) {
+          logDebug("Recognition ended unexpectedly - attempting to restart");
+          try {
+            recognition.start();
+            logDebug("Successfully restarted recognition");
+          } catch (e) {
+            logDebug(`Failed to restart recognition: ${e.message}`);
+            isRecording = false;
+            updateRecordingUI(false);
+          }
+        }
+      };
+      
+      logDebug("Speech recognition initialized successfully");
+      return true;
+      
+    } catch (error) {
+      logDebug(`Error initializing speech recognition: ${error.message}`);
+      console.error("Full error:", error);
+      alert("Could not initialize speech recognition. Please try Chrome browser.");
+      return false;
+    }
+  }
+  
+  // Start recording function
+  function startRecording() {
+    logDebug("Attempting to start recording");
+    
+    if (!currentPassage) {
+      alert("Please wait for the passage to load before recording.");
+      return;
+    }
+    
+    // Reset transcript completely when starting a new recording
+    currentTranscript = "";
+    
+    // Hide any previous analysis
+    analysisCard.classList.add('d-none');
+    
+    // Initialize if needed
+    if (!recognition) {
+      logDebug("Recognition not initialized, creating new instance");
+      if (!initSpeechRecognition()) {
+        return;
+      }
+    } else {
+      // If recognition exists, stop it first to reset internal state
+      try {
+        recognition.stop();
+      } catch (e) {
+        // Ignore any errors while stopping
+      }
+      
+      // Reset the transcript
+      recognition.resetTranscript();
+    }
+    
+    try {
+      // Reset the transcript UI
+      liveTranscription.textContent = "Listening...";
+      
+      // Small timeout to ensure previous recognition has properly stopped
+      setTimeout(() => {
+        recognition.start();
+        isRecording = true;
+        logDebug("Recording started successfully");
+        
+        // Update UI to recording state
+        updateRecordingUI(true);
+      }, 100);
+      
+    } catch (error) {
+      logDebug(`Error starting recording: ${error.message}`);
+      console.error("Full error:", error);
+      
+      // Try reinitializing recognition
+      logDebug("Trying to reinitialize recognition after error");
+      recognition = null;
+      if (initSpeechRecognition()) {
+        try {
+          recognition.start();
+          isRecording = true;
+          updateRecordingUI(true);
+          logDebug("Recording started successfully after reinitializing");
+        } catch (e) {
+          logDebug(`Still failed after reinitializing: ${e.message}`);
+          alert("Could not start speech recognition. Please ensure your microphone is connected and try again, or use Chrome browser.");
+        }
+      }
+    }
+  }
+  
+  // Stop recording function
+  function stopRecording() {
+    logDebug("Stopping recording");
+    
+    if (recognition) {
+      try {
+        recognition.stop();
+        logDebug("Recognition stopped successfully");
+      } catch (error) {
+        logDebug(`Error stopping recognition: ${error.message}`);
+      }
+    }
+    
+    isRecording = false;
+    updateRecordingUI(false);
+    
+    // Analyze results
+    const spokenText = currentTranscript.trim();
+    if (spokenText && spokenText !== "Ready to record your reading..." && 
+        spokenText !== "Listening...") {
+      logDebug(`Analyzing text: "${spokenText.substring(0, 30)}..."`);
+      analyzeReading(spokenText, currentPassage);
+    } else {
+      logDebug("No speech to analyze");
+      alert("No speech was detected. Please try again and speak clearly into your microphone.");
+    }
+  }
+  
+  // Update UI based on recording state
+  function updateRecordingUI(isRecording) {
+    if (isRecording) {
+      recordBtn.classList.remove('btn-success');
+      recordBtn.classList.add('btn-danger');
+      recordBtn.innerHTML = '<i class="fas fa-stop"></i> Stop Reading';
+      recordingIndicator.classList.remove('d-none');
+      liveTranscription.textContent = "Listening...";
+      
+      // Hide previous analysis
+      analysisCard.classList.add('d-none');
+      
+      // Hide pass/retry badges
+      passBadge.classList.add('d-none');
+      retryBadge.classList.add('d-none');
+      nextPassageBtn.classList.add('d-none');
+    } else {
+      recordBtn.classList.remove('btn-danger');
+      recordBtn.classList.add('btn-success');
+      recordBtn.innerHTML = '<i class="fas fa-microphone"></i> Start Reading';
+      recordingIndicator.classList.add('d-none');
+    }
+  }
+  
+  // Improved reading analysis function
+  function analyzeReading(spoken, original) {
+    logDebug("Analyzing reading performance");
+    
+    // Clean and normalize texts
+    const cleanSpoken = spoken.toLowerCase()
+      .replace(/[^\w\s.]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+      
+    const cleanOriginal = original.toLowerCase()
+      .replace(/[^\w\s.]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    
+    // Split by words for comparison, but preserve sentence structure
+    const spokenWords = cleanSpoken.split(/\s+/).filter(w => w.length > 0);
+    const originalWords = cleanOriginal.split(/\s+/).filter(w => w.length > 0);
+    
+    // Calculate accuracy with improved algorithm
+    let correctWords = 0;
+    let missedWords = [];
+    let mispronunciations = [];
+    
+    // Improved comparison with fuzzy matching and better handling of punctuation
+    spokenWords.forEach((word, i) => {
+      if (i < originalWords.length) {
+        const originalWord = originalWords[i];
+        
+        // Exact match or very close match (handling minor differences)
+        if (word === originalWord || levenshteinDistance(word, originalWord) <= 1) {
+          correctWords++;
+        } else {
+          // Track mispronunciations
+          mispronunciations.push({
+            spoken: word,
+            original: originalWord
+          });
+        }
+      }
+    });
+    
+    // Find words that were completely skipped
+    if (spokenWords.length < originalWords.length) {
+      for (let i = spokenWords.length; i < originalWords.length; i++) {
+        missedWords.push(originalWords[i]);
+      }
+    }
+    
+    // Calculate accuracy based on original text
+    const accuracy = originalWords.length > 0 ? 
+      Math.round((correctWords / originalWords.length) * 100) : 0;
+    
+    // Apply leniency factor to make scoring more generous
+    const leniencyFactor = 1.25; // Increase score by 25%
+    let adjustedAccuracy = Math.round(accuracy * leniencyFactor);
+    // Cap at 100% maximum
+    adjustedAccuracy = Math.min(adjustedAccuracy, 100);
+    
+    // Calculate fluency based on words per minute
+    const wordsPerMinute = Math.round(spokenWords.length / 0.5); // Assuming 30 seconds of reading
+    
+    logDebug(`Reading analysis complete. Raw accuracy: ${accuracy}%, Adjusted accuracy: ${adjustedAccuracy}%, Words per minute: ${wordsPerMinute}`);
+    
+    // Update UI with adjusted results
+    accuracyMeter.style.width = `${adjustedAccuracy}%`;
+    accuracyPercentage.textContent = `${adjustedAccuracy}%`;
+    
+    // Show pass/fail badge (using adjusted accuracy)
+    if (adjustedAccuracy >= 70) {
+      passBadge.classList.remove('d-none');
+      retryBadge.classList.add('d-none');
+      nextPassageBtn.classList.remove('d-none');
+    } else {
+      passBadge.classList.add('d-none');
+      retryBadge.classList.remove('d-none');
+      nextPassageBtn.classList.add('d-none');
+    }
+    
+    // Set color based on adjusted accuracy
+    if (adjustedAccuracy >= 80) {
+      accuracyMeter.style.backgroundColor = "var(--success-color)";
+    } else if (adjustedAccuracy >= 70) {
+      accuracyMeter.style.backgroundColor = "#4caf50";
+    } else if (adjustedAccuracy >= 50) {
+      accuracyMeter.style.backgroundColor = "var(--warning-color)";
+    } else {
+      accuracyMeter.style.backgroundColor = "var(--danger-color)";
+    }
+    
+    // Generate detailed feedback (based on adjusted score for more positive feedback)
+    let strengths = [];
+    let improvements = [];
+    
+    // For perfect scores, just congratulate without advice
+    if (adjustedAccuracy === 100) {
+      strengths.push("Perfect reading! Outstanding job!");
+      strengths.push("Your pronunciation is excellent!");
+      // Empty improvements for perfect score
+      improvements.push("Keep up the amazing work!");
+      
+      // Show special perfect badge
+      accuracyMeter.style.backgroundColor = "#8e44ad"; // Purple for perfect
+    } else if (adjustedAccuracy > 90) {
+      strengths.push("Outstanding accuracy with nearly perfect pronunciation");
+      strengths.push("Excellent reading comprehension");
+      
+      // Add a single improvement for near-perfect
+      if (wordsPerMinute < 120) {
+        improvements.push("Try increasing your reading speed slightly for more fluency");
+      } else {
+        improvements.push("Keep practicing to reach perfection!");
+      }
+    } else if (adjustedAccuracy > 75) {
+      strengths.push("Very good accuracy with most words pronounced correctly");
+      strengths.push("Good overall reading fluency");
+      
+      // Add a single improvement for near-perfect
+      if (wordsPerMinute < 120) {
+        improvements.push("Try increasing your reading speed slightly for more fluency");
+      } else {
+        improvements.push("Keep practicing to reach perfection!");
+      }
+    } else if (adjustedAccuracy > 60) {
+      strengths.push("Good effort with many words read correctly");
+      
+      if (spokenWords.length >= originalWords.length * 0.9) {
+        strengths.push("You attempted nearly all words in the passage");
+      }
+    } else {
+      strengths.push("Good attempt at a challenging passage");
+      
+      // If they at least got some words right
+      if (correctWords > 0) {
+        strengths.push(`Successfully pronounced ${correctWords} words correctly`);
+      }
+    }
+    
+    // Add information about reading speed
+    if (wordsPerMinute > 140) {
+      strengths.push("Fast reading pace shows confidence");
+    } else if (wordsPerMinute > 100) {
+      strengths.push("Good reading speed and pacing");
+    } else {
+      strengths.push("Careful, deliberate reading");
+    }
+    
+    // Improvement feedback
+    if (mispronunciations.length > 0) {
+      // Only mention a few mispronunciations to avoid overwhelming
+      const exampleWords = mispronunciations.slice(0, 2).map(m => m.original);
+      improvements.push(`Focus on correctly pronouncing words like: ${exampleWords.join(', ')}`);
+    }
+    
+    if (missedWords.length > 0) {
+      improvements.push(`Try not to skip words in the passage`);
+    }
+    
+    if (adjustedAccuracy < 70) {
+      if (wordsPerMinute > 130) {
+        improvements.push("Try reading a bit more slowly to improve accuracy");
+      } else if (wordsPerMinute < 80) {
+        improvements.push("Practice fluency to build reading confidence");
+      }
+      
+      // Difficulty suggestion
+      if (adjustedAccuracy < 50) {
+        const easierLevel = getSuggestedEasierLevel(currentDifficulty);
+        if (easierLevel) {
+          improvements.push(`Consider trying the ${easierLevel} level to build confidence`);
+        }
+      }
+    }
+    
+    // If they're doing really well, suggest a harder level
+    if (adjustedAccuracy > 85 && wordsPerMinute > 100) {
+      const harderLevel = getSuggestedHarderLevel(currentDifficulty);
+      if (harderLevel) {
+        improvements.push(`You're doing great! Try the ${harderLevel} level for more challenge`);
+      }
+    }
+    
+    // If we don't have enough improvements, add a generic one
+    if (improvements.length === 0) {
+      improvements.push("Keep practicing to maintain your skills");
+    }
+    
+    // Update lists with icons
+    strengthsList.innerHTML = strengths.map(s => 
+      `<li class="analysis-item"><i class="fas fa-check-circle"></i> <span>${s}</span></li>`
+    ).join('');
+    
+    improvementsList.innerHTML = improvements.map(s => 
+      `<li class="analysis-item"><i class="fas fa-exclamation-circle"></i> <span>${s}</span></li>`
+    ).join('');
+    
+    // Show analysis card with animation
+    analysisCard.classList.remove('d-none');
+  }
+  
+  // Get suggested easier difficulty level
+  function getSuggestedEasierLevel(currentLevel) {
+    const levels = ['beginner', 'elementary', 'intermediate', 'advanced', 'expert'];
+    const currentIndex = levels.indexOf(currentLevel);
+    
+    if (currentIndex > 0) {
+      return levels[currentIndex - 1].charAt(0).toUpperCase() + levels[currentIndex - 1].slice(1);
+    }
+    
+    return null;
+  }
+  
+  // Get suggested harder difficulty level
+  function getSuggestedHarderLevel(currentLevel) {
+    const levels = ['beginner', 'elementary', 'intermediate', 'advanced', 'expert'];
+    const currentIndex = levels.indexOf(currentLevel);
+    
+    if (currentIndex < levels.length - 1) {
+      return levels[currentIndex + 1].charAt(0).toUpperCase() + levels[currentIndex + 1].slice(1);
+    }
+    
+    return null;
+  }
+  
+  // Levenshtein distance for fuzzy word matching
+  function levenshteinDistance(a, b) {
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
+    
+    const matrix = [];
+    
+    // Initialize matrix
+    for (let i = 0; i <= b.length; i++) {
+      matrix[i] = [i];
+    }
+    
+    for (let j = 0; j <= a.length; j++) {
+      matrix[0][j] = j;
+    }
+    
+    // Fill matrix
+    for (let i = 1; i <= b.length; i++) {
+      for (let j = 1; j <= a.length; j++) {
+        if (b.charAt(i - 1) === a.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1, // substitution
+            matrix[i][j - 1] + 1,     // insertion
+            matrix[i - 1][j] + 1      // deletion
+          );
+        }
+      }
+    }
+    
+    return matrix[b.length][a.length];
+  }
+  
+  // Function to load a passage
+  function loadPassage(forceNew = false) {
+    // Check if we have a specifically requested passage
+    const urlParams = new URLSearchParams(window.location.search);
+    const requestedPassage = urlParams.get('passage');
+    const requestedLevel = urlParams.get('level');
+    
+    // If level is specified in URL, update current difficulty
+    if (requestedLevel && !forceNew) {
+      // Convert numeric level to difficulty
+      if (parseInt(requestedLevel) <= 2) currentDifficulty = 'easy';
+      else if (parseInt(requestedLevel) <= 5) currentDifficulty = 'medium';
+      else if (parseInt(requestedLevel) <= 25) currentDifficulty = 'hard';
+      else if (parseInt(requestedLevel) <= 50) currentDifficulty = 'advanced';
+      else currentDifficulty = 'expert';
+      
+      // Update UI to match
+      updateActiveDifficultyButton();
+    }
+    
+    logDebug(`Loading passage: difficulty=${currentDifficulty}, requestedPassage=${requestedPassage}`);
+    
+    // Show loading indicator
+    passageElement.textContent = "Loading passage...";
+    
+    // If we have a requested passage title, try to load it
+    if (requestedPassage && !forceNew) {
+      try {
+        // First try to get it from our local collection
+        const passage = window.getPassageByTitle(requestedPassage);
+        if (passage) {
+          handlePassageData({
+            title: passage.title,
+            passage: passage.passage
+          });
+          return;
+        }
+        
+        // If not found locally, try the server
+        fetch(`/get_passage?title=${encodeURIComponent(requestedPassage)}`)
+          .then(response => response.json())
+          .then(data => {
+            handlePassageData(data);
+          })
+          .catch(error => {
+            console.error('Error loading specific passage:', error);
+            loadFallbackPassage();
+          });
+      } catch (e) {
+        console.error('Error finding passage:', e);
+        loadFallbackPassage();
+      }
+      return;
+    }
+    
+    // Otherwise load a passage based on the current difficulty
+    try {
+      // Try to get from server first
+      fetch(`/get_passage?level=${currentDifficulty}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Server response not OK');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data && data.title && data.passage) {
+            handlePassageData(data);
+          } else {
+            throw new Error('Invalid data format from server');
+          }
+        })
+        .catch(error => {
+          console.error('Error loading passage from server:', error);
+          loadFallbackPassage();
+        });
+    } catch (e) {
+      console.error('Error fetching passage:', e);
+      loadFallbackPassage();
+    }
+  }
+  
+  // Load a fallback passage from our local collection
+  function loadFallbackPassage() {
+    console.log(`Loading fallback passage for difficulty: ${currentDifficulty}`);
+    
+    try {
+      // Use our function from passages.js
+      const passage = window.getRandomFallbackPassage(currentDifficulty);
+      
+      if (passage) {
+        handlePassageData({
+          title: passage.title,
+          passage: passage.passage
+        });
+      } else {
+        // If still fails, use hardcoded fallback
+        passageTitle.textContent = "Simple Reading Passage";
+        passageElement.textContent = "This is a simple reading passage. The system was unable to load a more appropriate passage. Please try again or select a different difficulty level.";
+        currentPassage = passageElement.textContent;
+      }
+    } catch (e) {
+      console.error('Error loading fallback passage:', e);
+      passageTitle.textContent = "Simple Reading Passage";
+      passageElement.textContent = "This is a simple reading passage. The system was unable to load a more appropriate passage. Please try again or select a different difficulty level.";
+      currentPassage = passageElement.textContent;
+    }
+  }
+  
+  // Handle passage data response
+  function handlePassageData(data) {
+    if (data && data.title && data.passage) {
+      // Success - use the returned passage
+      passageTitle.textContent = data.title;
+      passageElement.textContent = data.passage;
+      currentPassage = data.passage;
+    } else {
+      // Error or empty response - use fallback
+      loadFallbackPassage();
+    }
+    
+    // Reset UI
+    resetSpeechRecognition();
+  }
+  
+  // Set default active level
+  difficultyBtns['intermediate'].classList.add('active');
+  
+  // Load initial passage
+  loadPassage();
+
+  // Level progression system
+  const levelSystem = {
+    currentLevel: 1,
+    passagesCompleted: 0,
+    totalLevels: 100,
+    
+    // Requirements to advance to next level (passages to complete)
+    getLevelRequirement: function(level) {
+      // Increase requirements as levels progress
+      return Math.floor(5 + (level * 0.5));
+    },
+    
+    // Get level name based on current level
+    getLevelName: function(level) {
+      if (level <= 10) return "Novice Reader";
+      if (level <= 25) return "Apprentice Reader";
+      if (level <= 50) return "Skilled Reader";
+      if (level <= 75) return "Advanced Reader";
+      return "Master Reader";
+    },
+    
+    // Check if user can level up
+    checkLevelUp: function() {
+      const requirement = this.getLevelRequirement(this.currentLevel);
+      if (this.passagesCompleted >= requirement) {
+        this.levelUp();
+        return true;
+      }
+      return false;
+    },
+    
+    // Handle level up
+    levelUp: function() {
+      this.currentLevel++;
+      this.passagesCompleted = 0;
+      this.showLevelUpModal();
+      this.saveProgress();
+      
+      // Check achievements
+      achievements.check('level_up', this.currentLevel);
+      
+      // Adjust difficulty based on level
+      this.adjustDifficultyForLevel();
+    },
+    
+    // Show level up modal
+    showLevelUpModal: function() {
+      const modal = new bootstrap.Modal(document.getElementById('level-up-modal'));
+      document.querySelectorAll('.level-number').forEach(el => {
+        el.textContent = this.currentLevel;
+      });
+      document.getElementById('new-level').textContent = `Level ${this.currentLevel}`;
+      document.querySelector('.level-name').textContent = this.getLevelName(this.currentLevel);
+      
+      const requirement = this.getLevelRequirement(this.currentLevel);
+      document.querySelector('.level-badge small').textContent = 
+        `${this.passagesCompleted}/${requirement} passages completed`;
+      
+      modal.show();
+    },
+    
+    // Complete a passage
+    completePassage: function(accuracy) {
+      // Only count as complete if accuracy is ≥ 70%
+      if (accuracy >= 70) {
+        this.passagesCompleted++;
+        this.saveProgress();
+        
+        // Check achievements
+        return this.checkLevelUp();
+      }
+      return false;
+    },
+    
+    // Adjust difficulty based on current level
+    adjustDifficultyForLevel: function() {
+      // In early levels, use easier difficulty
+      if (this.currentLevel <= 20) {
+        // Favor beginner and elementary levels
+        if (currentDifficulty === 'advanced' || currentDifficulty === 'expert') {
+          currentDifficulty = 'intermediate';
+          updateActiveDifficultyButton();
+        }
+      } else if (this.currentLevel <= 50) {
+        // Mid levels use intermediate
+        if (currentDifficulty === 'beginner') {
+          currentDifficulty = 'elementary';
+          updateActiveDifficultyButton();
+        }
+      } else {
+        // Higher levels use more advanced content
+        if (currentDifficulty === 'beginner' || currentDifficulty === 'elementary') {
+          currentDifficulty = 'intermediate';
+          updateActiveDifficultyButton();
+        }
+      }
+      
+      // Load a new passage at appropriate difficulty
+      loadPassage(true);
+    },
+    
+    // Save progress to localStorage
+    saveProgress: function() {
+      const data = {
+        level: this.currentLevel,
+        passages: this.passagesCompleted
+      };
+      localStorage.setItem('literleap_level_progress', JSON.stringify(data));
+    },
+    
+    // Load progress from localStorage
+    loadProgress: function() {
+      const saved = localStorage.getItem('literleap_level_progress');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          this.currentLevel = data.level || 1;
+          this.passagesCompleted = data.passages || 0;
+          console.log(`Loaded progress: Level ${this.currentLevel}, Passages: ${this.passagesCompleted}`);
+        } catch (e) {
+          console.error('Error loading level progress:', e);
+        }
+      }
+    }
+  };
+  
+  // Achievement system
+  const achievements = {
+    list: [
+      { 
+        id: 'first_reading',
+        name: 'First Steps', 
+        description: 'Complete your first reading passage',
+        icon: 'fas fa-book',
+        type: 'complete_passage',
+        requirement: 1,
+        achieved: false
+      },
+      { 
+        id: 'five_readings',
+        name: 'Getting Started', 
+        description: 'Complete 5 reading passages',
+        icon: 'fas fa-book-reader',
+        type: 'complete_passage',
+        requirement: 5,
+        achieved: false
+      },
+      { 
+        id: 'perfect_score',
+        name: 'Perfect Reader', 
+        description: 'Achieve a perfect 100% score on a passage',
+        icon: 'fas fa-award',
+        type: 'perfect_score',
+        requirement: 1,
+        progress: 0,
+        achieved: false
+      },
+      { 
+        id: 'level_5',
+        name: 'Rising Star', 
+        description: 'Reach Level 5',
+        icon: 'fas fa-star',
+        type: 'level_up',
+        requirement: 5,
+        achieved: false
+      },
+      { 
+        id: 'level_10',
+        name: 'Dedicated Reader', 
+        description: 'Reach Level 10',
+        icon: 'fas fa-medal',
+        type: 'level_up',
+        requirement: 10,
+        achieved: false
+      },
+      { 
+        id: 'three_perfect',
+        name: 'Consistency Champion', 
+        description: 'Get three perfect scores',
+        icon: 'fas fa-trophy',
+        type: 'perfect_score',
+        requirement: 3,
+        progress: 0,
+        achieved: false
+      }
+    ],
+    
+    // Check if an achievement has been earned
+    check: function(type, value) {
+      let achievementUnlocked = null;
+      
+      this.list.forEach(achievement => {
+        if (achievement.achieved) return;
+        
+        if (achievement.type === type) {
+          if (type === 'perfect_score') {
+            // Increment progress for perfect score achievements
+            achievement.progress = (achievement.progress || 0) + 1;
+            if (achievement.progress >= achievement.requirement) {
+              achievement.achieved = true;
+              achievementUnlocked = achievement;
+            }
+          } else if (value >= achievement.requirement) {
+            achievement.achieved = true;
+            achievementUnlocked = achievement;
+          }
+        }
+      });
+      
+      if (achievementUnlocked) {
+        this.showAchievementModal(achievementUnlocked);
+        this.saveProgress();
+      }
+    },
+    
+    // Show achievement unlocked modal
+    showAchievementModal: function(achievement) {
+      const modal = new bootstrap.Modal(document.getElementById('milestone-modal'));
+      document.getElementById('milestone-name').textContent = achievement.name;
+      document.getElementById('milestone-description').textContent = achievement.description;
+      document.getElementById('milestone-icon').className = `${achievement.icon} fa-4x text-warning`;
+      
+      // Set progress
+      const progress = achievement.progress !== undefined ? 
+        achievement.progress : achievement.requirement;
+      const progressPercent = 100;
+      document.getElementById('milestone-progress').style.width = `${progressPercent}%`;
+      document.getElementById('milestone-progress-text').textContent = 
+        `${progress}/${achievement.requirement}`;
+      
+      modal.show();
+    },
+    
+    // Save achievements to localStorage
+    saveProgress: function() {
+      localStorage.setItem('literleap_achievements', JSON.stringify(this.list));
+    },
+    
+    // Load achievements from localStorage
+    loadProgress: function() {
+      const saved = localStorage.getItem('literleap_achievements');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          
+          // Update our list with saved progress
+          data.forEach(savedAchievement => {
+            const achievement = this.list.find(a => a.id === savedAchievement.id);
+            if (achievement) {
+              achievement.achieved = savedAchievement.achieved || false;
+              if (savedAchievement.progress !== undefined) {
+                achievement.progress = savedAchievement.progress;
+              }
+            }
+          });
+          
+          console.log('Loaded achievements progress');
+        } catch (e) {
+          console.error('Error loading achievements:', e);
+        }
+      }
+    }
+  };
+  
+  // Helper function to update active difficulty button
+  function updateActiveDifficultyButton() {
+    Object.values(difficultyBtns).forEach(btn => {
+      btn.classList.remove('active');
+    });
+    
+    if (difficultyBtns[currentDifficulty]) {
+      difficultyBtns[currentDifficulty].classList.add('active');
+      
+      // Update description
+      difficultyDescription.innerHTML = `<i class="fas fa-info-circle"></i> ${currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1)}: ${difficultyDescriptions[currentDifficulty]}`;
+    }
+  }
+  
+  // Update the analyzeReading function to check for achievements
+  const originalAnalyzeReading = analyzeReading;
+  analyzeReading = function(spoken, original) {
+    // Call the original function
+    originalAnalyzeReading(spoken, original);
+    
+    // Check for perfect score achievement
+    if (adjustedAccuracy === 100) {
+      achievements.check('perfect_score', 1);
+    }
+    
+    // Track passage completion and check for level up
+    levelSystem.completePassage(adjustedAccuracy);
+  };
+
+  // Initialize progression systems
+  levelSystem.loadProgress();
+  achievements.loadProgress();
+  
+  // Add a status display to the page
+  const statusHtml = `
+    <div class="card mt-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="mb-1">Level ${levelSystem.currentLevel}</h5>
+            <div class="text-muted">${levelSystem.getLevelName(levelSystem.currentLevel)}</div>
+          </div>
+          <div class="text-end">
+            <div class="progress" style="width: 150px; height: 10px;">
+              <div class="progress-bar bg-primary" role="progressbar" style="width: ${(levelSystem.passagesCompleted / levelSystem.getLevelRequirement(levelSystem.currentLevel)) * 100}%"></div>
+            </div>
+            <small class="text-muted">${levelSystem.passagesCompleted}/${levelSystem.getLevelRequirement(levelSystem.currentLevel)} passages</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Add the status display after the intro text
+  const contentArea = document.querySelector('.content-area');
+  const introSection = document.querySelector('.content-area > div:first-child');
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = statusHtml;
+  contentArea.insertBefore(tempDiv.firstElementChild, introSection.nextSibling);
+});
+</script>
+{% endblock %}

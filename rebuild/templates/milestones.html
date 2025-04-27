@@ -1,0 +1,1026 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+  .milestone-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  
+  .milestone-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+  
+  .milestone-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .milestone-header.locked {
+    background-color: #6c757d;
+  }
+  
+  .milestone-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 5rem;
+    opacity: 0.1;
+  }
+  
+  .milestone-body {
+    padding: 1.5rem;
+    background-color: white;
+  }
+  
+  .level-progress {
+    height: 10px;
+    border-radius: 5px;
+    background-color: #e9ecef;
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+  
+  .level-progress-bar {
+    height: 100%;
+    background-color: var(--success-color);
+    transition: width 1s ease;
+  }
+  
+  .level-indicator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .badge-level {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-weight: 500;
+  }
+  
+  .achievement-item {
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+  
+  .achievement-item:hover {
+    background-color: #e9f5ff;
+  }
+  
+  .achievement-item.locked {
+    opacity: 0.7;
+    background-color: #f1f1f1;
+  }
+  
+  .achievement-icon {
+    width: 50px;
+    height: 50px;
+    background-color: #e3f2fd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+  }
+  
+  .achievement-icon.locked {
+    background-color: #e9ecef;
+    color: #adb5bd;
+  }
+  
+  .achievement-text {
+    flex: 1;
+  }
+  
+  .level-map {
+    position: relative;
+    margin: 2rem 0;
+    padding: 0;
+  }
+  
+  .level-node {
+    position: relative;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    z-index: 1;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .level-node:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+  }
+  
+  .level-node.active {
+    border: 2px solid var(--primary-color);
+  }
+  
+  .level-node.completed {
+    background-color: #e8f5e9;
+    border: 2px solid #4caf50;
+  }
+  
+  .level-node:before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    width: 3px;
+    height: 2rem;
+    background-color: #dee2e6;
+    transform: translateX(-50%);
+    z-index: 0;
+  }
+  
+  .level-node:last-child:before {
+    display: none;
+  }
+  
+  .level-number {
+    width: 40px;
+    height: 40px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 1rem;
+  }
+  
+  .level-number.completed {
+    background-color: #4caf50;
+  }
+  
+  .level-details {
+    flex: 1;
+  }
+  
+  .tab-content {
+    padding: 1.5rem 0;
+  }
+  
+  .streak-display {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-weight: bold;
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  .achievement-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: var(--warning-color);
+    color: #333;
+    font-size: 0.8rem;
+    padding: 3px 8px;
+    border-radius: 30px;
+    transform: translate(30%, -30%);
+    font-weight: bold;
+    animation: pulse 2s infinite;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-area">
+  <h1 class="mb-4">Milestones & Achievements</h1>
+  
+  <div class="row">
+    <div class="col-lg-4">
+      <div class="card milestone-card">
+        <div class="milestone-header">
+          <h4 class="mb-1">Your Progress</h4>
+          <p class="mb-0">Track your learning journey</p>
+          <i class="fas fa-chart-line milestone-icon"></i>
+        </div>
+        <div class="milestone-body">
+          <div class="streak-display">
+            <i class="fas fa-fire me-2"></i> <span id="streak-days">0</span> days
+          </div>
+          <p>Keep your daily streak going by completing at least one reading or writing exercise each day!</p>
+          
+          <div class="level-indicator">
+            <span class="badge-level">Level <span id="current-level">1</span></span>
+            <span id="level-name" class="text-muted">Novice Reader</span>
+          </div>
+          
+          <div class="level-progress">
+            <div id="level-progress-bar" class="level-progress-bar" style="width: 25%"></div>
+          </div>
+          
+          <div class="d-flex justify-content-between">
+            <small class="text-muted">Progress</small>
+            <small id="level-progress-text" class="text-muted">2/8 passages</small>
+          </div>
+          
+          <div class="mt-4">
+            <h5>Recent Activity</h5>
+            <div id="recent-activities" class="list-group list-group-flush">
+              <div class="list-group-item px-0">
+                <div class="d-flex w-100 justify-content-between">
+                  <h6 class="mb-1">Completed "Ocean Adventure"</h6>
+                  <small class="text-muted">Today</small>
+                </div>
+                <p class="mb-1 text-muted small">Reading accuracy: 87%</p>
+              </div>
+              <div class="list-group-item px-0">
+                <div class="d-flex w-100 justify-content-between">
+                  <h6 class="mb-1">Unlocked "First Steps" achievement</h6>
+                  <small class="text-muted">Yesterday</small>
+                </div>
+                <p class="mb-1 text-muted small">Complete your first reading passage</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-8">
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="achievements-tab" data-bs-toggle="tab" data-bs-target="#achievements" type="button" role="tab" aria-controls="achievements" aria-selected="true">
+            <i class="fas fa-trophy me-2"></i>Achievements
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="levels-tab" data-bs-toggle="tab" data-bs-target="#levels" type="button" role="tab" aria-controls="levels" aria-selected="false">
+            <i class="fas fa-map me-2"></i>Level Map
+          </button>
+        </li>
+      </ul>
+      
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="achievements" role="tabpanel" aria-labelledby="achievements-tab">
+          <div class="row">
+            <!-- Reading Achievements -->
+            <div class="col-md-6">
+              <h5 class="mb-3">Reading Achievements</h5>
+              
+              <div class="achievement-item">
+                <div class="achievement-icon">
+                  <i class="fas fa-book"></i>
+                </div>
+                <div class="achievement-text">
+                  <h6 class="mb-1">First Steps</h6>
+                  <p class="mb-0 text-muted small">Complete your first reading passage</p>
+                </div>
+                <div>
+                  <span class="badge bg-success"><i class="fas fa-check"></i></span>
+                </div>
+              </div>
+              
+              <div class="achievement-item">
+                <div class="achievement-icon">
+                  <i class="fas fa-book-reader"></i>
+                </div>
+                <div class="achievement-text">
+                  <h6 class="mb-1">Getting Started</h6>
+                  <p class="mb-0 text-muted small">Complete 5 reading passages</p>
+                </div>
+                <div>
+                  <span class="badge bg-secondary">2/5</span>
+                </div>
+              </div>
+              
+              <div class="achievement-item locked">
+                <div class="achievement-icon locked">
+                  <i class="fas fa-award"></i>
+                </div>
+                <div class="achievement-text">
+                  <h6 class="mb-1">Perfect Reader</h6>
+                  <p class="mb-0 text-muted small">Achieve a perfect 100% score on a passage</p>
+                </div>
+                <div>
+                  <span class="badge bg-secondary">0/1</span>
+                </div>
+              </div>
+              
+              <div class="achievement-item locked">
+                <div class="achievement-icon locked">
+                  <i class="fas fa-star"></i>
+                </div>
+                <div class="achievement-text">
+                  <h6 class="mb-1">Rising Star</h6>
+                  <p class="mb-0 text-muted small">Reach Level 5</p>
+                </div>
+                <div>
+                  <span class="badge bg-secondary">1/5</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Writing Achievements -->
+            <div class="col-md-6">
+              <h5 class="mb-3">Writing Achievements</h5>
+              
+              <div class="achievement-item">
+                <div class="achievement-icon">
+                  <i class="fas fa-pencil-alt"></i>
+                </div>
+                <div class="achievement-text">
+                  <h6 class="mb-1">First Draft</h6>
+                  <p class="mb-0 text-muted small">Complete your first writing exercise</p>
+                </div>
+                <div>
+                  <span class="badge bg-success"><i class="fas fa-check"></i></span>
+                </div>
+              </div>
+              
+              <div class="achievement-item locked">
+                <div class="achievement-icon locked">
+                  <i class="fas fa-keyboard"></i>
+                </div>
+                <div class="achievement-text">
+                  <h6 class="mb-1">Budding Writer</h6>
+                  <p class="mb-0 text-muted small">Complete 5 writing exercises</p>
+                </div>
+                <div>
+                  <span class="badge bg-secondary">1/5</span>
+                </div>
+              </div>
+              
+              <div class="achievement-item locked">
+                <div class="achievement-icon locked">
+                  <i class="fas fa-spell-check"></i>
+                </div>
+                <div class="achievement-text">
+                  <h6 class="mb-1">Spelling Champion</h6>
+                  <p class="mb-0 text-muted small">Achieve 100% accuracy in a spelling challenge</p>
+                </div>
+                <div>
+                  <span class="badge bg-secondary">0/1</span>
+                </div>
+              </div>
+              
+              <div class="achievement-item locked">
+                <div class="achievement-icon locked">
+                  <i class="fas fa-pen-fancy"></i>
+                </div>
+                <div class="achievement-text">
+                  <h6 class="mb-1">Word Wizard</h6>
+                  <p class="mb-0 text-muted small">Use at least 5 challenging vocabulary words in a writing exercise</p>
+                </div>
+                <div>
+                  <span class="badge bg-secondary">0/1</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Special Achievements -->
+          <div class="mt-4">
+            <h5 class="mb-3">Special Achievements</h5>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="achievement-item locked">
+                  <div class="achievement-icon locked">
+                    <i class="fas fa-fire"></i>
+                  </div>
+                  <div class="achievement-text">
+                    <h6 class="mb-1">On Fire</h6>
+                    <p class="mb-0 text-muted small">Maintain a 7-day streak</p>
+                  </div>
+                  <div>
+                    <span class="badge bg-secondary">0/7</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="achievement-item locked">
+                  <div class="achievement-icon locked">
+                    <i class="fas fa-certificate"></i>
+                  </div>
+                  <div class="achievement-text">
+                    <h6 class="mb-1">Well Rounded</h6>
+                    <p class="mb-0 text-muted small">Complete both reading and writing exercises on the same day for 5 days</p>
+                  </div>
+                  <div>
+                    <span class="badge bg-secondary">1/5</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tab-pane fade" id="levels" role="tabpanel" aria-labelledby="levels-tab">
+          <div class="level-map">
+            <div class="level-node active" data-level="1" data-bs-toggle="modal" data-bs-target="#levelModal">
+              <div class="level-number">1</div>
+              <div class="level-details">
+                <h6 class="mb-1">Novice Reader</h6>
+                <p class="mb-0 text-muted small">Begin your reading journey</p>
+              </div>
+              <div class="achievement-badge">CURRENT</div>
+            </div>
+            
+            <div class="level-node" data-level="2" data-bs-toggle="modal" data-bs-target="#levelModal">
+              <div class="level-number">2</div>
+              <div class="level-details">
+                <h6 class="mb-1">Apprentice Reader</h6>
+                <p class="mb-0 text-muted small">Complete 8 passages to unlock</p>
+              </div>
+            </div>
+            
+            <div class="level-node" data-level="3" data-bs-toggle="modal" data-bs-target="#levelModal">
+              <div class="level-number">3</div>
+              <div class="level-details">
+                <h6 class="mb-1">Developing Reader</h6>
+                <p class="mb-0 text-muted small">Complete 10 passages to unlock</p>
+              </div>
+            </div>
+            
+            <div class="level-node" data-level="5" data-bs-toggle="modal" data-bs-target="#levelModal">
+              <div class="level-number">5</div>
+              <div class="level-details">
+                <h6 class="mb-1">Skilled Reader</h6>
+                <p class="mb-0 text-muted small">Complete 12 passages to unlock</p>
+              </div>
+            </div>
+            
+            <div class="level-node" data-level="10" data-bs-toggle="modal" data-bs-target="#levelModal">
+              <div class="level-number">10</div>
+              <div class="level-details">
+                <h6 class="mb-1">Fluent Reader</h6>
+                <p class="mb-0 text-muted small">Complete 15 passages to unlock</p>
+              </div>
+            </div>
+            
+            <div class="level-node" data-level="25" data-bs-toggle="modal" data-bs-target="#levelModal">
+              <div class="level-number">25</div>
+              <div class="level-details">
+                <h6 class="mb-1">Advanced Reader</h6>
+                <p class="mb-0 text-muted small">Complete 20 passages to unlock</p>
+              </div>
+            </div>
+            
+            <div class="level-node" data-level="50" data-bs-toggle="modal" data-bs-target="#levelModal">
+              <div class="level-number">50</div>
+              <div class="level-details">
+                <h6 class="mb-1">Expert Reader</h6>
+                <p class="mb-0 text-muted small">Complete 25 passages to unlock</p>
+              </div>
+            </div>
+            
+            <div class="level-node" data-level="100" data-bs-toggle="modal" data-bs-target="#levelModal">
+              <div class="level-number">100</div>
+              <div class="level-details">
+                <h6 class="mb-1">Master Reader</h6>
+                <p class="mb-0 text-muted small">The pinnacle of reading skill</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> As you progress through levels, passages will become more challenging and require higher accuracy to pass.
+          </div>
+          
+          <div class="card mt-4">
+            <div class="card-body">
+              <h5 class="card-title">Level Benefits</h5>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Level Range</th>
+                      <th>Benefits</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>1-10</td>
+                      <td>Access to beginner and elementary passages, gentle feedback</td>
+                    </tr>
+                    <tr>
+                      <td>11-25</td>
+                      <td>Unlock intermediate passages, personalized recommendations</td>
+                    </tr>
+                    <tr>
+                      <td>26-50</td>
+                      <td>Unlock advanced passages, detailed performance insights</td>
+                    </tr>
+                    <tr>
+                      <td>51-75</td>
+                      <td>Unlock expert passages, advanced vocabulary challenges</td>
+                    </tr>
+                    <tr>
+                      <td>76-100</td>
+                      <td>Unlock master level content, special achievement badges, mentor status</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Level Modal -->
+<div class="modal fade" id="levelModal" tabindex="-1" aria-labelledby="levelModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="levelModalLabel">Level Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-4 text-center">
+            <div class="level-icon mb-3">
+              <span id="modalLevelNumber" class="d-inline-block" style="width: 80px; height: 80px; background-color: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold;">1</span>
+            </div>
+            <h4 id="modalLevelName">Novice Reader</h4>
+            <div class="mt-3 mb-4">
+              <span id="modalLevelStatus" class="badge bg-success py-2 px-3">Current Level</span>
+            </div>
+            <div class="progress mb-3" style="height: 10px;">
+              <div id="modalLevelProgress" class="progress-bar bg-success" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <p id="modalLevelProgress-text" class="text-muted">2/8 passages completed</p>
+          </div>
+          <div class="col-md-8">
+            <h5>Level Challenges</h5>
+            <div id="levelChallenges" class="list-group mb-4">
+              <!-- Challenges will be populated dynamically -->
+            </div>
+            
+            <h5>Rewards Upon Completion</h5>
+            <ul id="levelRewards" class="mb-4">
+              <!-- Rewards will be populated dynamically -->
+            </ul>
+            
+            <h5>Reading Passages</h5>
+            <div id="levelPassages" class="card-group">
+              <!-- Passages will be populated dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <a id="startLevelButton" href="/reading" class="btn btn-primary">Start Reading</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Retrieve level progress from localStorage if available
+    let levelProgress = {
+      level: 1,
+      passages: 2,
+      requirement: 8,
+      name: "Novice Reader"
+    };
+    
+    try {
+      const saved = localStorage.getItem('literleap_level_progress');
+      if (saved) {
+        const data = JSON.parse(saved);
+        levelProgress.level = data.level || 1;
+        levelProgress.passages = data.passages || 0;
+        
+        // Get level name based on level
+        levelProgress.name = getLevelName(levelProgress.level);
+        
+        // Calculate requirement for current level
+        levelProgress.requirement = getLevelRequirement(levelProgress.level);
+      }
+    } catch (e) {
+      console.error('Error loading level progress:', e);
+    }
+    
+    // Update UI with level progress
+    document.getElementById('current-level').textContent = levelProgress.level;
+    document.getElementById('level-name').textContent = levelProgress.name;
+    document.getElementById('level-progress-text').textContent = 
+      `${levelProgress.passages}/${levelProgress.requirement} passages`;
+    
+    // Calculate and set progress bar width
+    const progressPercent = (levelProgress.passages / levelProgress.requirement) * 100;
+    document.getElementById('level-progress-bar').style.width = `${progressPercent}%`;
+    
+    // Load achievements from localStorage if available
+    let achievements = [];
+    try {
+      const saved = localStorage.getItem('literleap_achievements');
+      if (saved) {
+        achievements = JSON.parse(saved);
+        updateAchievementUI(achievements);
+      }
+    } catch (e) {
+      console.error('Error loading achievements:', e);
+    }
+    
+    // Load streak data
+    let streak = 0;
+    try {
+      const saved = localStorage.getItem('literleap_streak');
+      if (saved) {
+        const data = JSON.parse(saved);
+        streak = data.days || 0;
+      }
+    } catch (e) {
+      console.error('Error loading streak:', e);
+    }
+    
+    // Update streak display
+    document.getElementById('streak-days').textContent = streak;
+    
+    // Helper function to get level name based on level
+    function getLevelName(level) {
+      if (level <= 10) return "Novice Reader";
+      if (level <= 25) return "Apprentice Reader";
+      if (level <= 50) return "Skilled Reader";
+      if (level <= 75) return "Advanced Reader";
+      return "Master Reader";
+    }
+    
+    // Helper function to get level requirement
+    function getLevelRequirement(level) {
+      // Increase requirements as levels progress
+      return Math.floor(5 + (level * 0.5));
+    }
+    
+    // Helper function to update achievement UI
+    function updateAchievementUI(achievements) {
+      // This would update the UI based on actual achievements
+      // For now, we're using the static HTML defined above
+      console.log('Would update achievements UI with:', achievements);
+    }
+    
+    // DEMO ONLY: For demonstration purposes, add fake recent activities
+    function loadRecentActivities() {
+      const activities = [
+        {
+          title: "Completed \"Ocean Adventure\"",
+          time: "Today",
+          details: "Reading accuracy: 87%"
+        },
+        {
+          title: "Unlocked \"First Steps\" achievement",
+          time: "Yesterday",
+          details: "Complete your first reading passage"
+        },
+        {
+          title: "Completed \"The Lost Library\"",
+          time: "2 days ago",
+          details: "Reading accuracy: 75%"
+        }
+      ];
+      
+      const container = document.getElementById('recent-activities');
+      container.innerHTML = '';
+      
+      activities.forEach(activity => {
+        const item = document.createElement('div');
+        item.className = 'list-group-item px-0';
+        item.innerHTML = `
+          <div class="d-flex w-100 justify-content-between">
+            <h6 class="mb-1">${activity.title}</h6>
+            <small class="text-muted">${activity.time}</small>
+          </div>
+          <p class="mb-1 text-muted small">${activity.details}</p>
+        `;
+        container.appendChild(item);
+      });
+    }
+    
+    // Load recent activities for demo
+    loadRecentActivities();
+    
+    // Level data - contains information for each level
+    const levelData = {
+      1: {
+        name: "Novice Reader",
+        status: "current",
+        description: "Begin your reading journey with simple passages.",
+        progress: { current: 2, required: 8 },
+        challenges: [
+          { title: "Complete 3 easy passages", progress: 2, total: 3 },
+          { title: "Achieve 80% accuracy on any passage", progress: 1, total: 1, completed: true },
+          { title: "Learn 10 new vocabulary words", progress: 5, total: 10 }
+        ],
+        rewards: [
+          "Unlock Apprentice Reader level",
+          "Earn 'Getting Started' achievement",
+          "Access to slightly more challenging passages"
+        ],
+        passages: [
+          { title: "The Lost Ball", difficulty: "Easy", completed: true },
+          { title: "My Dog Friend", difficulty: "Easy", completed: true },
+          { title: "A Day at the Beach", difficulty: "Easy", completed: false },
+          { title: "The Big Race", difficulty: "Easy", completed: false }
+        ]
+      },
+      2: {
+        name: "Apprentice Reader",
+        status: "locked",
+        description: "Build your reading confidence with more detailed passages.",
+        progress: { current: 0, required: 10 },
+        challenges: [
+          { title: "Complete 5 passages", progress: 0, total: 5 },
+          { title: "Achieve 85% accuracy on any passage", progress: 0, total: 1 },
+          { title: "Read at 80 words per minute", progress: 0, total: 1 }
+        ],
+        rewards: [
+          "Unlock Developing Reader level",
+          "Earn 'Reading Rhythm' achievement",
+          "Unlock medium difficulty passages"
+        ],
+        passages: [
+          { title: "The Mystery Box", difficulty: "Easy", completed: false },
+          { title: "A Trip to the Zoo", difficulty: "Easy", completed: false },
+          { title: "The Broken Bicycle", difficulty: "Easy", completed: false },
+          { title: "My First Garden", difficulty: "Medium", completed: false, locked: true }
+        ]
+      },
+      3: {
+        name: "Developing Reader",
+        status: "locked",
+        description: "Enhance your reading skills with varied texts.",
+        progress: { current: 0, required: 12 },
+        challenges: [
+          { title: "Complete 6 passages (2 medium)", progress: 0, total: 6 },
+          { title: "Achieve 90% accuracy", progress: 0, total: 1 },
+          { title: "Read for 5 consecutive days", progress: 0, total: 5 }
+        ],
+        rewards: [
+          "Unlock 'Consistent Reader' achievement",
+          "Access to more medium difficulty passages",
+          "Special pronunciation guide feature"
+        ],
+        passages: [
+          { title: "The Ancient Map", difficulty: "Medium", completed: false, locked: true },
+          { title: "Lost in the Forest", difficulty: "Medium", completed: false, locked: true }
+        ]
+      },
+      5: {
+        name: "Skilled Reader",
+        status: "locked", 
+        description: "Take on more complex texts with improved comprehension.",
+        progress: { current: 0, required: 15 },
+        challenges: [
+          { title: "Complete 8 passage (4 medium)", progress: 0, total: 8 },
+          { title: "Achieve 95% pronunciation accuracy", progress: 0, total: 1 }
+        ],
+        rewards: [
+          "Unlock 'Word Master' achievement",
+          "Access to hard difficulty passages",
+          "Personalized reading recommendations"
+        ],
+        passages: []
+      },
+      10: {
+        name: "Fluent Reader",
+        status: "locked",
+        description: "Read fluently with excellent comprehension.",
+        progress: { current: 0, required: 20 },
+        challenges: [
+          { title: "Complete 10 medium/hard passages", progress: 0, total: 10 }
+        ],
+        rewards: [
+          "Unlock 'Reading Expert' badge",
+          "Access to expert-level passages",
+          "Advanced analytics feature"
+        ],
+        passages: []
+      },
+      25: {
+        name: "Advanced Reader",
+        status: "locked",
+        description: "Master complex texts and concepts.",
+        progress: { current: 0, required: 25 },
+        challenges: [
+          { title: "Complete 15 hard passages", progress: 0, total: 15 }
+        ],
+        rewards: [
+          "Unlock 'Literary Scholar' achievement",
+          "Access to all difficulty levels",
+          "Special profile customization options"
+        ],
+        passages: []
+      },
+      50: {
+        name: "Expert Reader",
+        status: "locked",
+        description: "Read at an advanced level with perfect comprehension.",
+        progress: { current: 0, required: 30 },
+        challenges: [],
+        rewards: [
+          "Unlock 'Reading Master' achievement",
+          "Ability to create custom reading passages",
+          "Exclusive mentor status"
+        ],
+        passages: []
+      },
+      100: {
+        name: "Master Reader",
+        status: "locked",
+        description: "The pinnacle of reading achievement.",
+        progress: { current: 0, required: 50 },
+        challenges: [],
+        rewards: [
+          "Ultimate 'Literacy Champion' achievement",
+          "Complete access to all platform features",
+          "Recognition on the LiterLeap leaderboard"
+        ],
+        passages: []
+      }
+    };
+    
+    // Handle level modal opening
+    const levelModal = document.getElementById('levelModal');
+    if (levelModal) {
+      levelModal.addEventListener('show.bs.modal', function (event) {
+        // Button that triggered the modal
+        const node = event.relatedTarget;
+        // Extract level info from data-* attributes
+        const levelNumber = node.getAttribute('data-level');
+        const level = levelData[levelNumber];
+        
+        if (!level) return;
+        
+        // Update the modal content
+        document.getElementById('modalLevelNumber').textContent = levelNumber;
+        document.getElementById('modalLevelName').textContent = level.name;
+        
+        // Update status badge
+        const statusBadge = document.getElementById('modalLevelStatus');
+        if (level.status === 'current') {
+          statusBadge.textContent = 'Current Level';
+          statusBadge.className = 'badge bg-success py-2 px-3';
+          document.getElementById('startLevelButton').textContent = 'Continue Reading';
+          document.getElementById('startLevelButton').classList.remove('disabled');
+        } else if (level.status === 'completed') {
+          statusBadge.textContent = 'Completed';
+          statusBadge.className = 'badge bg-primary py-2 px-3';
+          document.getElementById('startLevelButton').textContent = 'Review Level';
+          document.getElementById('startLevelButton').classList.remove('disabled');
+        } else {
+          statusBadge.textContent = 'Locked';
+          statusBadge.className = 'badge bg-secondary py-2 px-3';
+          document.getElementById('startLevelButton').textContent = 'Locked';
+          document.getElementById('startLevelButton').classList.add('disabled');
+        }
+        
+        // Update progress bar
+        const progress = level.progress;
+        const progressPercent = (progress.current / progress.required) * 100;
+        document.getElementById('modalLevelProgress').style.width = `${progressPercent}%`;
+        document.getElementById('modalLevelProgress-text').textContent = 
+          `${progress.current}/${progress.required} passages completed`;
+        
+        // Update challenges
+        const challengesContainer = document.getElementById('levelChallenges');
+        challengesContainer.innerHTML = '';
+        
+        if (level.challenges && level.challenges.length > 0) {
+          level.challenges.forEach(challenge => {
+            const challengeItem = document.createElement('div');
+            challengeItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+            if (challenge.completed) {
+              challengeItem.classList.add('list-group-item-success');
+            }
+            
+            const titleSpan = document.createElement('span');
+            titleSpan.textContent = challenge.title;
+            
+            const badgeSpan = document.createElement('span');
+            badgeSpan.className = 'badge bg-primary rounded-pill';
+            badgeSpan.textContent = `${challenge.progress}/${challenge.total}`;
+            
+            challengeItem.appendChild(titleSpan);
+            challengeItem.appendChild(badgeSpan);
+            challengesContainer.appendChild(challengeItem);
+          });
+        } else {
+          challengesContainer.innerHTML = '<p class="text-muted">No specific challenges for this level.</p>';
+        }
+        
+        // Update rewards
+        const rewardsContainer = document.getElementById('levelRewards');
+        rewardsContainer.innerHTML = '';
+        
+        if (level.rewards && level.rewards.length > 0) {
+          level.rewards.forEach(reward => {
+            const rewardItem = document.createElement('li');
+            rewardItem.textContent = reward;
+            rewardsContainer.appendChild(rewardItem);
+          });
+        } else {
+          rewardsContainer.innerHTML = '<p class="text-muted">No specific rewards for this level.</p>';
+        }
+        
+        // Update passages
+        const passagesContainer = document.getElementById('levelPassages');
+        passagesContainer.innerHTML = '';
+        
+        if (level.passages && level.passages.length > 0) {
+          level.passages.forEach(passage => {
+            const passageCol = document.createElement('div');
+            passageCol.className = 'col-6 mb-3';
+            
+            const passageCard = document.createElement('div');
+            passageCard.className = 'card h-100';
+            if (passage.locked) {
+              passageCard.classList.add('bg-light');
+            }
+            
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body';
+            
+            const title = document.createElement('h6');
+            title.className = 'card-title';
+            title.textContent = passage.title;
+            
+            const difficulty = document.createElement('p');
+            difficulty.className = 'card-text small';
+            
+            let difficultyBadge = 'bg-success';
+            if (passage.difficulty === 'Medium') difficultyBadge = 'bg-warning';
+            if (passage.difficulty === 'Hard') difficultyBadge = 'bg-danger';
+            
+            difficulty.innerHTML = `<span class="badge ${difficultyBadge}">${passage.difficulty}</span>`;
+            
+            cardBody.appendChild(title);
+            cardBody.appendChild(difficulty);
+            
+            if (passage.completed) {
+              const completedBadge = document.createElement('span');
+              completedBadge.className = 'position-absolute top-0 end-0 mt-2 me-2 badge bg-success';
+              completedBadge.innerHTML = '<i class="fas fa-check"></i>';
+              cardBody.appendChild(completedBadge);
+            }
+            
+            if (passage.locked) {
+              const lockedOverlay = document.createElement('div');
+              lockedOverlay.className = 'text-center mt-2';
+              lockedOverlay.innerHTML = '<i class="fas fa-lock text-muted"></i> <span class="text-muted">Locked</span>';
+              cardBody.appendChild(lockedOverlay);
+            } else {
+              const readBtn = document.createElement('a');
+              readBtn.href = `/reading?passage=${encodeURIComponent(passage.title)}`;
+              readBtn.className = 'btn btn-sm btn-outline-primary mt-2';
+              readBtn.textContent = passage.completed ? 'Read Again' : 'Start Reading';
+              cardBody.appendChild(readBtn);
+            }
+            
+            passageCard.appendChild(cardBody);
+            passageCol.appendChild(passageCard);
+            passagesContainer.appendChild(passageCol);
+          });
+        } else {
+          passagesContainer.innerHTML = '<p class="text-muted">Passages will be revealed when you reach this level.</p>';
+        }
+        
+        // Set the start reading button's href with the level parameter
+        document.getElementById('startLevelButton').href = `/reading?level=${levelNumber}`;
+      });
+    }
+  });
+</script>
+{% endblock %} 

@@ -1,0 +1,135 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="content-area">
+    <h1 class="mb-4">Your Profile</h1>
+    
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <div class="card p-4">
+                <h3 class="mb-3">Personal Information</h3>
+                
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name" value="Student" disabled>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="grade" class="form-label">Grade</label>
+                    <input type="text" class="form-control" id="grade" value="7th Grade" disabled>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="reading-level" class="form-label">Reading Level</label>
+                    <select class="form-select" id="reading-level">
+                        <option value="beginner">Beginner</option>
+                        <option value="elementary">Elementary</option>
+                        <option value="intermediate" selected>Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                        <option value="expert">Expert</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card p-4">
+                <h3 class="mb-3">Account Statistics</h3>
+                
+                <div class="mb-3">
+                    <label class="form-label">Daily Streak</label>
+                    <div class="streak-display w-100 text-center py-2">
+                        <i class="fas fa-fire me-2"></i> {{ streak_count }} days
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Exercises Completed</label>
+                    <div class="bg-light p-3 text-center rounded">
+                        <span class="h3">42</span>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Member Since</label>
+                    <div class="bg-light p-3 text-center rounded">
+                        <span class="h5">October 15, 2024</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card p-4">
+        <h3 class="mb-4">Your Interests</h3>
+        <p>Select topics you're interested in to receive personalized content:</p>
+        
+        <div class="row" id="interest-container">
+            {% for interest in available_interests %}
+            <div class="col-md-4 mb-2">
+                <div class="form-check">
+                    <input class="form-check-input interest-checkbox" type="checkbox" value="{{ interest }}" 
+                        id="interest-{{ loop.index }}" 
+                        {% if interest in interests %}checked{% endif %}>
+                    <label class="form-check-label" for="interest-{{ loop.index }}">
+                        {{ interest }}
+                    </label>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <button class="btn btn-primary mt-4" id="save-interests">
+            <i class="fas fa-save me-2"></i> Save Preferences
+        </button>
+        
+        <div class="alert alert-success mt-3 d-none" id="save-success">
+            <i class="fas fa-check-circle me-2"></i> Your preferences have been saved!
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const saveBtn = document.getElementById('save-interests');
+        const successAlert = document.getElementById('save-success');
+        const interestCheckboxes = document.querySelectorAll('.interest-checkbox');
+        
+        saveBtn.addEventListener('click', function() {
+            // Collect selected interests
+            const selectedInterests = [];
+            interestCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    selectedInterests.push(checkbox.value);
+                }
+            });
+            
+            // Send to server
+            fetch('/save_interests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    interests: selectedInterests
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    successAlert.classList.remove('d-none');
+                    setTimeout(() => {
+                        successAlert.classList.add('d-none');
+                    }, 3000);
+                }
+            })
+            .catch(error => {
+                console.error('Error saving interests:', error);
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LiterLeap - Literacy Intervention Platform</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Plotly for charts -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/reading.css">
+    
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            --primary-color: #4b7bec;
+            --secondary-color: #3867d6;
+            --light-color: #f5f6fa;
+            --dark-color: #2f3542;
+            --success-color: #26de81;
+            --warning-color: #fed330;
+            --danger-color: #fc5c65;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f8f7;
+            color: #333;
+        }
+        
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .nav-link {
+            color: var(--dark-color);
+            font-weight: 500;
+            padding: 0.8rem 1rem;
+            border-radius: 0.25rem;
+            margin: 0 0.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .content-area {
+            padding: 2rem;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .streak-display {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        /* Reading and writing specific styles */
+        .passage-container {
+            background-color: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        
+        .feedback-container {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
+        
+        .character-feedback {
+            font-family: monospace;
+            font-size: 1.2rem;
+            letter-spacing: 0.1rem;
+        }
+        
+        .char-correct {
+            color: var(--success-color);
+        }
+        
+        .char-incorrect {
+            color: var(--danger-color);
+            text-decoration: underline;
+        }
+        
+        .char-missing, .char-extra {
+            color: var(--warning-color);
+            font-style: italic;
+        }
+        
+        .highlight-word {
+            background-color: #ffcccb;
+            padding: 0 3px;
+            border-radius: 3px;
+        }
+        
+        /* Progress page styles */
+        .metric-card {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            background-color: #f8f9fa;
+            margin-bottom: 1.5rem;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-label {
+            font-size: 1rem;
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+        
+        .activity-item {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            background-color: #f8f9fa;
+        }
+        
+        .activity-date {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+    </style>
+    
+    <!-- Any additional head content -->
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-book-reader"></i> LiterLeap
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/reading' %}active{% endif %}" href="/reading">
+                            <i class="fas fa-book"></i> Reading
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/writing' %}active{% endif %}" href="/writing">
+                            <i class="fas fa-pencil-alt"></i> Writing
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/progress' %}active{% endif %}" href="/progress">
+                            <i class="fas fa-chart-line"></i> Progress
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/milestones' %}active{% endif %}" href="/milestones">
+                            <i class="fas fa-trophy"></i> Milestones
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/profile' %}active{% endif %}" href="/profile">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content Area -->
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <!-- Footer -->
+    <footer class="text-center py-4 mt-5">
+        <div class="container">
+            <p>LiterLeap - AI-Powered Literacy Intervention Platform</p>
+            <p class="text-muted">© 2025 LiterLeap Team • Morgan Hacks Project</p>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script>
+        // Any global JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add animations or other global functionality here
+            console.log('LiterLeap initialized!');
+        });
+    </script>
+    
+    <!-- Page-specific JS -->
+    {% block scripts %}{% endblock %}
+</body>
+</html> 
