@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+    <!-- Character Sprites -->
+    <defs>
+        <!-- Basic Character -->
+        <g id="character-basic">
+            <circle cx="25" cy="25" r="10" fill="#FFB74D" /> <!-- Head -->
+            <rect x="20" y="35" width="10" height="20" fill="#90CAF9" /> <!-- Body -->
+            <line x1="20" y1="40" x2="10" y2="50" stroke="#90CAF9" stroke-width="3" /> <!-- Left Arm -->
+            <line x1="30" y1="40" x2="40" y2="50" stroke="#90CAF9" stroke-width="3" /> <!-- Right Arm -->
+            <line x1="20" y1="55" x2="15" y2="70" stroke="#90CAF9" stroke-width="3" /> <!-- Left Leg -->
+            <line x1="30" y1="55" x2="35" y2="70" stroke="#90CAF9" stroke-width="3" /> <!-- Right Leg -->
+        </g>
+
+        <!-- Happy Character -->
+        <g id="character-happy">
+            <use href="#character-basic" />
+            <path d="M20,25 Q25,30 30,25" stroke="#333" stroke-width="2" fill="none" /> <!-- Smile -->
+        </g>
+
+        <!-- Sad Character -->
+        <g id="character-sad">
+            <use href="#character-basic" />
+            <path d="M20,28 Q25,23 30,28" stroke="#333" stroke-width="2" fill="none" /> <!-- Frown -->
+        </g>
+
+        <!-- Running Character -->
+        <g id="character-running">
+            <use href="#character-basic" transform="rotate(10,25,45)" />
+            <line x1="15" y1="70" x2="20" y2="55" stroke="#90CAF9" stroke-width="3" /> <!-- Bent Leg -->
+        </g>
+
+        <!-- Props -->
+        <!-- Book -->
+        <g id="prop-book">
+            <rect x="0" y="0" width="30" height="25" fill="#795548" />
+            <rect x="2" y="2" width="26" height="21" fill="#FFECB3" />
+            <line x1="15" y1="2" x2="15" y2="23" stroke="#795548" stroke-width="1" />
+        </g>
+
+        <!-- Ball -->
+        <g id="prop-ball">
+            <circle cx="15" cy="15" r="15" fill="#F44336" />
+            <path d="M5,15 Q15,25 25,15" stroke="#white" stroke-width="2" fill="none" />
+        </g>
+
+        <!-- Tree -->
+        <g id="prop-tree">
+            <rect x="20" y="30" width="20" height="50" fill="#795548" />
+            <circle cx="30" cy="25" r="25" fill="#4CAF50" />
+        </g>
+
+        <!-- House -->
+        <g id="prop-house">
+            <rect x="10" y="30" width="60" height="50" fill="#BDBDBD" />
+            <path d="M0,30 L40,0 L80,30" fill="#F44336" />
+            <rect x="35" y="50" width="20" height="30" fill="#795548" />
+            <rect x="15" y="40" width="15" height="15" fill="#90CAF9" />
+            <rect x="55" y="40" width="15" height="15" fill="#90CAF9" />
+        </g>
+
+        <!-- Backgrounds -->
+        <!-- Sky -->
+        <g id="background-sky">
+            <rect x="0" y="0" width="800" height="400" fill="#2196F3" />
+            <circle cx="700" cy="100" r="40" fill="#FFD54F" /> <!-- Sun -->
+            <path d="M100,150 Q150,100 200,150" stroke="white" stroke-width="3" fill="none" /> <!-- Cloud -->
+            <path d="M500,100 Q550,50 600,100" stroke="white" stroke-width="3" fill="none" /> <!-- Cloud -->
+        </g>
+
+        <!-- Room -->
+        <g id="background-room">
+            <rect x="0" y="0" width="800" height="400" fill="#FAFAFA" />
+            <rect x="50" y="50" width="100" height="150" fill="#90CAF9" /> <!-- Window -->
+            <line x1="100" y1="50" x2="100" y2="200" stroke="#64B5F6" stroke-width="2" />
+            <rect x="0" y="300" width="800" height="100" fill="#795548" /> <!-- Floor -->
+        </g>
+
+        <!-- Park -->
+        <g id="background-park">
+            <rect x="0" y="0" width="800" height="300" fill="#2196F3" /> <!-- Sky -->
+            <rect x="0" y="300" width="800" height="100" fill="#4CAF50" /> <!-- Grass -->
+            <use href="#prop-tree" x="100" y="200" />
+            <use href="#prop-tree" x="300" y="220" />
+            <use href="#prop-tree" x="500" y="180" />
+        </g>
+
+        <!-- Effects -->
+        <!-- Sparkle -->
+        <g id="effect-sparkle">
+            <path d="M10,0 L12,8 L20,10 L12,12 L10,20 L8,12 L0,10 L8,8 Z" fill="#FFD54F">
+                <animateTransform
+                    attributeName="transform"
+                    type="rotate"
+                    from="0 10 10"
+                    to="360 10 10"
+                    dur="2s"
+                    repeatCount="indefinite" />
+            </path>
+        </g>
+
+        <!-- Poof -->
+        <g id="effect-poof">
+            <circle cx="25" cy="25" r="20" fill="#BDBDBD" opacity="0.8">
+                <animate
+                    attributeName="r"
+                    values="0;20;0"
+                    dur="1s"
+                    repeatCount="1" />
+                <animate
+                    attributeName="opacity"
+                    values="0.8;0"
+                    dur="1s"
+                    repeatCount="1" />
+            </circle>
+        </g>
+
+        <!-- Motion Lines -->
+        <g id="effect-motion">
+            <line x1="0" y1="10" x2="20" y2="10" stroke="#333" stroke-width="2">
+                <animate
+                    attributeName="x1"
+                    values="0;10;0"
+                    dur="0.5s"
+                    repeatCount="indefinite" />
+                <animate
+                    attributeName="x2"
+                    values="20;30;20"
+                    dur="0.5s"
+                    repeatCount="indefinite" />
+            </line>
+            <line x1="0" y1="20" x2="20" y2="20" stroke="#333" stroke-width="2">
+                <animate
+                    attributeName="x1"
+                    values="10;0;10"
+                    dur="0.5s"
+                    repeatCount="indefinite" />
+                <animate
+                    attributeName="x2"
+                    values="30;20;30"
+                    dur="0.5s"
+                    repeatCount="indefinite" />
+            </line>
+        </g>
+    </defs>
+
+    <!-- Example Scene -->
+    <g id="example-scene">
+        <use href="#background-park" x="0" y="0" />
+        <use href="#character-happy" x="100" y="300" />
+        <use href="#prop-ball" x="200" y="350" />
+        <use href="#effect-sparkle" x="150" y="320" />
+    </g>
+
+    <style>
+        /* Animation Classes */
+        .walk {
+            animation: walk 1s infinite;
+        }
+        
+        .jump {
+            animation: jump 0.5s;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+        
+        .spin {
+            animation: spin 1s infinite linear;
+        }
+        
+        /* Animation Keyframes */
+        @keyframes walk {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        @keyframes jump {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+
+    <script>
+        // Animation Functions
+        function walkCharacter(characterId, distance) {
+            const character = document.getElementById(characterId);
+            character.classList.add('walk');
+            character.style.transform = `translateX(${distance}px)`;
+        }
+        
+        function jumpCharacter(characterId) {
+            const character = document.getElementById(characterId);
+            character.classList.add('jump');
+            setTimeout(() => character.classList.remove('jump'), 500);
+        }
+        
+        function addSparkle(x, y) {
+            const sparkle = document.createElementNS("http://www.w3.org/2000/svg", "use");
+            sparkle.setAttributeNS(null, "href", "#effect-sparkle");
+            sparkle.setAttributeNS(null, "x", x);
+            sparkle.setAttributeNS(null, "y", y);
+            document.querySelector('svg').appendChild(sparkle);
+            setTimeout(() => sparkle.remove(), 2000);
+        }
+        
+        function changeBackground(backgroundId) {
+            const backgrounds = document.querySelectorAll('[id^="background-"]');
+            backgrounds.forEach(bg => bg.style.opacity = 0);
+            document.getElementById(backgroundId).style.opacity = 1;
+        }
+    </script>
+</svg> 

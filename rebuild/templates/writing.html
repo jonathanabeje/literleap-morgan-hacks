@@ -2,412 +2,1352 @@
 
 {% block content %}
 <div class="content-area">
-    <h1 class="mb-4">Writing Practice</h1>
-    
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="d-flex align-items-center flex-wrap">
-                <select id="exercise-type-selector" class="form-select me-3 mb-2" style="width: auto;">
-                    <option value="word" selected>Spelling (Word)</option>
-                    <option value="phrase">Dictation (Phrase)</option>
-                </select>
-                
-                <select id="difficulty-selector" class="form-select me-3 mb-2" style="width: auto;">
-                    <option value="beginner">Beginner</option>
-                    <option value="elementary">Elementary</option>
-                    <option value="intermediate" selected>Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                    <option value="expert">Expert</option>
-                </select>
-                
-                <select id="category-selector" class="form-select me-3 mb-2" style="width: auto;">
-                    <option value="" selected>Random Category</option>
-                    <!-- Categories will be populated by JS -->
-                </select>
-                
-                <button id="new-exercise-btn" class="btn btn-outline-primary mb-2">
-                    <i class="fas fa-sync-alt me-2"></i> New Exercise
-                </button>
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs mb-4" id="writingTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="practice-tab" data-bs-toggle="tab" data-bs-target="#practice" type="button" role="tab">
+                Spelling & Dictation
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="intervention-tab" data-bs-toggle="tab" data-bs-target="#intervention" type="button" role="tab">
+                Writing Studio
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="space-adventure-tab" data-bs-toggle="tab" data-bs-target="#space-adventure" type="button" role="tab">
+                Space Adventure Zone
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="parent-portal-tab" data-bs-toggle="tab" data-bs-target="#parent-portal" type="button" role="tab">
+                Parent Portal
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="teacher-portal-tab" data-bs-toggle="tab" data-bs-target="#teacher-portal" type="button" role="tab">
+                Teacher Portal
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="writingTabsContent">
+        <!-- Original Spelling & Dictation Content -->
+        <div class="tab-pane fade show active" id="practice" role="tabpanel">
+            <h1 class="mb-4">Writing Practice</h1>
+            
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="d-flex align-items-center flex-wrap">
+                        <select id="exercise-type-selector" class="form-select me-3 mb-2" style="width: auto;">
+                            <option value="word" selected>Spelling (Word)</option>
+                            <option value="phrase">Dictation (Phrase)</option>
+                        </select>
+                        
+                        <select id="difficulty-selector" class="form-select me-3 mb-2" style="width: auto;">
+                            <option value="beginner">Beginner</option>
+                            <option value="elementary">Elementary</option>
+                            <option value="intermediate" selected>Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                        
+                        <select id="category-selector" class="form-select me-3 mb-2" style="width: auto;">
+                            <option value="" selected>Random Category</option>
+                            <!-- Categories will be populated by JS -->
+                        </select>
+                        
+                        <button id="new-exercise-btn" class="btn btn-outline-primary mb-2">
+                            <i class="fas fa-sync-alt me-2"></i> New Exercise
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 id="exercise-title" class="mb-4">Spelling Exercise</h2>
+                    
+                    <div class="alert alert-primary">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong id="exercise-instruction">{{ exercise.instruction }}</strong>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-lg-6">
+                            <div class="card bg-light p-4 mb-4">
+                                <h4 class="mb-3">
+                                    <i class="fas fa-volume-up me-2"></i> <span id="listen-label">Listen to the word</span>
+                                </h4>
+                                
+                                <div class="d-flex align-items-center">
+                                    <button id="listen-btn" class="btn btn-primary">
+                                        <i class="fas fa-play me-2"></i> Play Audio
+                                    </button>
+                                    
+                                    <div class="ms-3 text-muted" id="word-hint">
+                                        <em>Hint: {{ exercise.hint }}</em>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group mb-4" id="word-input-container">
+                                <label for="spelling-input" class="form-label">Your answer:</label>
+                                <input type="text" id="spelling-input" class="form-control form-control-lg" 
+                                       placeholder="Type the word here...">
+                            </div>
+                            
+                            <div class="form-group mb-4 d-none" id="phrase-input-container">
+                                <label for="phrase-input" class="form-label">Your answer:</label>
+                                <textarea id="phrase-input" class="form-control" rows="3"
+                                          placeholder="Type the complete phrase here..."></textarea>
+                            </div>
+                            
+                            <button id="submit-answer-btn" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check me-2"></i> Submit Answer
+                            </button>
+                        </div>
+                        
+                        <div class="col-lg-6" id="feedback-container" style="display: none;">
+                            <div id="correct-feedback" class="alert alert-success d-none">
+                                <h4><i class="fas fa-check-circle me-2"></i> Correct!</h4>
+                                <p>Great job! You spelled it correctly.</p>
+                            </div>
+                            
+                            <div id="incorrect-feedback" class="alert alert-danger d-none">
+                                <h4><i class="fas fa-times-circle me-2"></i> Not quite right</h4>
+                                <p>The correct text is: <strong id="correct-text"></strong></p>
+                            </div>
+                            
+                            <div class="card p-4 mt-4">
+                                <h4 class="mb-3">Character Analysis</h4>
+                                <div id="character-feedback" class="character-feedback mb-3">
+                                    <!-- Character feedback will be inserted here -->
+                                </div>
+                                
+                                <div id="spelling-rule" class="alert alert-info mt-3 d-none">
+                                    <i class="fas fa-lightbulb me-2"></i>
+                                    <span id="spelling-rule-text"></span>
+                                </div>
+                            </div>
+                            
+                            <button id="next-exercise-btn" class="btn btn-primary mt-4">
+                                <i class="fas fa-arrow-right me-2"></i> Next Exercise
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Challenge words section (only visible for word exercises) -->
+            <div class="card mb-4" id="challenge-section">
+                <div class="card-body">
+                    <h3 class="mb-3">Spelling Challenges</h3>
+                    <p>Practice with these common spelling challenges:</p>
+                    
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-outline-secondary w-100" data-challenge="silent_letters">
+                                Silent Letters
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-outline-secondary w-100" data-challenge="double_consonants">
+                                Double Consonants
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-outline-secondary w-100" data-challenge="ie_ei_words">
+                                I before E
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-outline-secondary w-100" data-challenge="homophones">
+                                Homophones
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="card mb-4">
-        <div class="card-body">
-            <h2 id="exercise-title" class="mb-4">Spelling Exercise</h2>
-            
-            <div class="alert alert-primary">
-                <i class="fas fa-info-circle me-2"></i>
-                <strong id="exercise-instruction">{{ exercise.instruction }}</strong>
-            </div>
-            
-            <div class="row mt-4">
-                <div class="col-lg-6">
-                    <div class="card bg-light p-4 mb-4">
-                        <h4 class="mb-3">
-                            <i class="fas fa-volume-up me-2"></i> <span id="listen-label">Listen to the word</span>
-                        </h4>
-                        
-                        <div class="d-flex align-items-center">
-                            <button id="listen-btn" class="btn btn-primary">
-                                <i class="fas fa-play me-2"></i> Play Audio
-                            </button>
-                            
-                            <div class="ms-3 text-muted" id="word-hint">
-                                <em>Hint: {{ exercise.hint }}</em>
+
+        <!-- New Writing Intervention Content -->
+        <div class="tab-pane fade" id="intervention" role="tabpanel">
+            <div class="row">
+                <!-- Learning Companion Section -->
+                <div class="col-md-3">
+                    <div class="card mb-4">
+                        <div class="card-body text-center">
+                            <div id="companion-avatar" class="mb-3">
+                                <!-- Avatar will be loaded here -->
+                            </div>
+                            <h4 id="companion-name">Writing Buddy</h4>
+                            <p id="companion-message" class="text-muted">Ready to help you write!</p>
+                            <div class="d-flex justify-content-center gap-2">
+                                <button id="companion-voice" class="btn btn-outline-primary">
+                                    <i class="fas fa-microphone"></i> Ask for Help
+                                </button>
+                                <button id="play-voice" class="btn btn-outline-success" style="display: none;">
+                                    <i class="fas fa-play"></i> Play Response
+                                </button>
+                            </div>
+                            <div id="recording-status" class="mt-2 text-muted" style="display: none;">
+                                <i class="fas fa-circle text-danger"></i> Recording...
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="form-group mb-4" id="word-input-container">
-                        <label for="spelling-input" class="form-label">Your answer:</label>
-                        <input type="text" id="spelling-input" class="form-control form-control-lg" 
-                               placeholder="Type the word here...">
+
+                    <!-- Writing Strength Map -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4>Your Writing Strengths</h4>
+                            <div id="strength-map">
+                                <!-- Strength indicators will be added here -->
+                            </div>
+                        </div>
                     </div>
-                    
-                    <div class="form-group mb-4 d-none" id="phrase-input-container">
-                        <label for="phrase-input" class="form-label">Your answer:</label>
-                        <textarea id="phrase-input" class="form-control" rows="3"
-                                  placeholder="Type the complete phrase here..."></textarea>
-                    </div>
-                    
-                    <button id="submit-answer-btn" class="btn btn-primary btn-lg">
-                        <i class="fas fa-check me-2"></i> Submit Answer
-                    </button>
                 </div>
-                
-                <div class="col-lg-6" id="feedback-container" style="display: none;">
-                    <div id="correct-feedback" class="alert alert-success d-none">
-                        <h4><i class="fas fa-check-circle me-2"></i> Correct!</h4>
-                        <p>Great job! You spelled it correctly.</p>
-                    </div>
-                    
-                    <div id="incorrect-feedback" class="alert alert-danger d-none">
-                        <h4><i class="fas fa-times-circle me-2"></i> Not quite right</h4>
-                        <p>The correct text is: <strong id="correct-text"></strong></p>
-                    </div>
-                    
-                    <div class="card p-4 mt-4">
-                        <h4 class="mb-3">Character Analysis</h4>
-                        <div id="character-feedback" class="character-feedback mb-3">
-                            <!-- Character feedback will be inserted here -->
+
+                <!-- Main Writing Area -->
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3>Writing Studio</h3>
+                                <span class="badge bg-primary" id="current-level">Level 1: Word Wizard</span>
+                            </div>
+
+                            <!-- Writing Prompt -->
+                            <div class="alert alert-info mb-4">
+                                <h5>Your Writing Prompt:</h5>
+                                <p id="writing-prompt" class="mb-2">Loading your personalized prompt...</p>
+                                <button id="topic-generate" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-sync"></i> New Topic
+                                </button>
+                            </div>
+
+                            <!-- Writing Area -->
+                            <div class="form-group mb-4">
+                                <textarea id="writing-input" class="form-control" rows="8" 
+                                    placeholder="Start writing here..."></textarea>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <button id="writing-submit" class="btn btn-primary">
+                                    <i class="fas fa-check"></i> Submit Writing
+                                </button>
+                                <button id="writing-save" class="btn btn-outline-secondary">
+                                    <i class="fas fa-save"></i> Save Draft
+                                </button>
+                            </div>
                         </div>
-                        
-                        <div id="spelling-rule" class="alert alert-info mt-3 d-none">
-                            <i class="fas fa-lightbulb me-2"></i>
-                            <span id="spelling-rule-text"></span>
+                    </div>
+
+                    <!-- Story Animator -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4>Story Animator</h4>
+                            <svg id="story-animator-svg" width="100%" height="200"></svg>
                         </div>
                     </div>
-                    
-                    <button id="next-exercise-btn" class="btn btn-primary mt-4">
-                        <i class="fas fa-arrow-right me-2"></i> Next Exercise
-                    </button>
+                </div>
+
+                <!-- Progress & Achievements -->
+                <div class="col-md-3">
+                    <!-- Current Achievement Progress -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4>Achievement Progress</h4>
+                            <div id="achievement-progress">
+                                <!-- Achievement progress will be shown here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Writing Analysis -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4>Writing Analysis</h4>
+                            <div id="writing-analysis">
+                                <div class="progress mb-3">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%" 
+                                         id="grammar-score" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                        Grammar
+                                    </div>
+                                </div>
+                                <div class="progress mb-3">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%" 
+                                         id="vocabulary-score" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                        Vocabulary
+                                    </div>
+                                </div>
+                                <div class="progress mb-3">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%" 
+                                         id="structure-score" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                        Structure
+                                    </div>
+                                </div>
+                                <div class="progress mb-3">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%" 
+                                         id="organization-score" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                        Organization
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Achievements -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h4>Recent Achievements</h4>
+                            <div id="recent-achievements">
+                                <!-- Recent achievements will be shown here -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Challenge words section (only visible for word exercises) -->
-    <div class="card mb-4" id="challenge-section">
-        <div class="card-body">
-            <h3 class="mb-3">Spelling Challenges</h3>
-            <p>Practice with these common spelling challenges:</p>
-            
+
+        <!-- Space Adventure Zone Tab Content -->
+        <div class="tab-pane fade" id="space-adventure" role="tabpanel">
+            <div class="space-adventure-background">
+                <div class="stars"></div>
+                <div class="twinkling"></div>
+                <div class="clouds"></div>
+                
+                <div class="row">
+                    <!-- Character Section -->
+                    <div class="col-md-3">
+                        <div class="card mb-4 space-adventure-card">
+                            <div class="card-body text-center">
+                                <div class="character-container">
+                                    <div id="mordecai-avatar" class="mb-3">
+                                        <span class="character-emoji" style="font-size: 4rem;">🦜</span>
+                                    </div>
+                                    <div id="rigby-avatar" class="mb-3" style="display: none;">
+                                        <span class="character-emoji" style="font-size: 4rem;">🦝</span>
+                                    </div>
+                                    <div id="highfiveghost-avatar" class="mb-3" style="display: none;">
+                                        <span class="character-emoji" style="font-size: 4rem;">👻</span>
+                                    </div>
+                                </div>
+                                <h4 id="character-name" class="text-white">Mordecai</h4>
+                                <p id="character-message" class="text-white">Ohhhh, ready for some awesome writing!</p>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <button id="character-voice" class="btn btn-outline-light">
+                                        <i class="fas fa-microphone"></i> Ask for Help
+                                    </button>
+                                    <button id="play-character-voice" class="btn btn-outline-light" style="display: none;">
+                                        <i class="fas fa-play"></i> Play Response
+                                    </button>
+                                </div>
+                                <div class="character-switcher mt-3">
+                                    <button class="btn btn-sm btn-outline-light character-btn active" data-character="mordecai">Mordecai</button>
+                                    <button class="btn btn-sm btn-outline-light character-btn" data-character="rigby">Rigby</button>
+                                    <button class="btn btn-sm btn-outline-light character-btn" data-character="highfiveghost">High Five Ghost</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Space Adventure Tips -->
+                        <div class="card mb-4 space-adventure-card">
+                            <div class="card-body">
+                                <h4 class="text-white">Space Adventure Tips</h4>
+                                <div id="space-adventure-tips">
+                                    <div class="tip-item">
+                                        <i class="fas fa-lightbulb text-warning"></i>
+                                        <span class="text-white">Keep it weird and awesome!</span>
+                                    </div>
+                                    <div class="tip-item">
+                                        <i class="fas fa-magic text-info"></i>
+                                        <span class="text-white">Add some supernatural elements</span>
+                                    </div>
+                                    <div class="tip-item">
+                                        <i class="fas fa-laugh text-success"></i>
+                                        <span class="text-white">Include some humor</span>
+                                    </div>
+                                    <div class="tip-item">
+                                        <i class="fas fa-rocket text-danger"></i>
+                                        <span class="text-white">Blast off into space!</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Space Power-Ups -->
+                        <div class="card mb-4 space-adventure-card">
+                            <div class="card-body">
+                                <h4 class="text-white">Space Power-Ups</h4>
+                                <div class="power-ups-container">
+                                    <div class="power-up-item" data-power="wordboost">
+                                        <div class="power-up-icon">🚀</div>
+                                        <div class="power-up-details">
+                                            <h5 class="text-white">Word Boost</h5>
+                                            <p class="text-white-50">Get 5 awesome vocabulary words</p>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-light activate-power-up">Activate</button>
+                                    </div>
+                                    <div class="power-up-item" data-power="storyidea">
+                                        <div class="power-up-icon">💡</div>
+                                        <div class="power-up-details">
+                                            <h5 class="text-white">Story Idea</h5>
+                                            <p class="text-white-50">Get a random story idea</p>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-light activate-power-up">Activate</button>
+                                    </div>
+                                    <div class="power-up-item" data-power="characterboost">
+                                        <div class="power-up-icon">🎭</div>
+                                        <div class="power-up-details">
+                                            <h5 class="text-white">Character Boost</h5>
+                                            <p class="text-white-50">Get character dialogue ideas</p>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-light activate-power-up">Activate</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Writing Area -->
+                    <div class="col-md-6">
+                        <div class="card mb-4 space-adventure-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h3 class="text-white">Space Adventure Zone</h3>
+                                    <span class="badge bg-primary" id="space-adventure-level">Level 1: Space Explorer</span>
+                                </div>
+
+                                <!-- Writing Prompt -->
+                                <div class="alert alert-info mb-4 space-adventure-prompt">
+                                    <h5 class="text-white">Your Space Adventure Prompt:</h5>
+                                    <p id="space-adventure-writing-prompt" class="mb-2 text-white">Loading your awesome prompt...</p>
+                                    <button id="space-adventure-topic-generate" class="btn btn-sm btn-outline-light">
+                                        <i class="fas fa-sync"></i> New Topic
+                                    </button>
+                                </div>
+
+                                <!-- Writing Area -->
+                                <div class="form-group mb-4">
+                                    <textarea id="space-adventure-writing-input" class="form-control space-textarea" rows="8" 
+                                        placeholder="Start writing your awesome space adventure here..."></textarea>
+                                </div>
+                                
+                                <!-- Space Adventure Writing Tools -->
+                                <div class="space-adventure-writing-tools mb-3">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-outline-light" id="space-adventure-bold">
+                                            <i class="fas fa-bold"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-light" id="space-adventure-italic">
+                                            <i class="fas fa-italic"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-light" id="space-adventure-underline">
+                                            <i class="fas fa-underline"></i>
+                                        </button>
+                                    </div>
+                                    <div class="btn-group ms-2" role="group">
+                                        <button type="button" class="btn btn-outline-light" id="space-adventure-quote">
+                                            <i class="fas fa-quote-right"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-light" id="space-adventure-emoji">
+                                            <i class="fas fa-smile"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-light" id="space-adventure-character">
+                                            <i class="fas fa-user"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button id="space-adventure-writing-submit" class="btn btn-primary">
+                                        <i class="fas fa-check"></i> Submit Adventure
+                                    </button>
+                                    <button id="space-adventure-writing-save" class="btn btn-outline-light">
+                                        <i class="fas fa-save"></i> Save Draft
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Space Adventure Animator -->
+                        <div class="card mb-4 space-adventure-card">
+                            <div class="card-body">
+                                <h4 class="text-white">Space Adventure Animator</h4>
+                                <div id="space-adventure-animator" class="text-center">
+                                    <div class="space-adventure-character-animation">
+                                        <!-- Character animations will be added here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Space Adventure Elements -->
+                        <div class="card mb-4 space-adventure-card">
+                            <div class="card-body">
+                                <h4 class="text-white">Adventure Elements</h4>
+                                <div class="adventure-elements-container">
+                                    <div class="adventure-element-item" data-element="character">
+                                        <h5 class="text-white">Characters</h5>
+                                        <div class="adventure-element-content" id="character-suggestions">
+                                            <p class="text-white-50">Add characters to your adventure</p>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-light generate-element">Generate</button>
+                                    </div>
+                                    <div class="adventure-element-item" data-element="setting">
+                                        <h5 class="text-white">Settings</h5>
+                                        <div class="adventure-element-content" id="setting-suggestions">
+                                            <p class="text-white-50">Add settings to your adventure</p>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-light generate-element">Generate</button>
+                                    </div>
+                                    <div class="adventure-element-item" data-element="dialogue">
+                                        <h5 class="text-white">Dialogue</h5>
+                                        <div class="adventure-element-content" id="dialogue-suggestions">
+                                            <p class="text-white-50">Add dialogue to your adventure</p>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-light generate-element">Generate</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress & Achievements -->
+                    <div class="col-md-3">
+                        <!-- Current Achievement Progress -->
+                        <div class="card mb-4 space-adventure-card">
+                            <div class="card-body">
+                                <h4 class="text-white">Space Achievements</h4>
+                                <div id="space-adventure-achievement-progress">
+                                    <div class="achievement-item">
+                                        <div class="achievement-icon">🚀</div>
+                                        <div class="achievement-details">
+                                            <h5 class="text-white">Space Explorer</h5>
+                                            <p class="text-white-50">Mastered basic writing</p>
+                                        </div>
+                                    </div>
+                                    <div class="achievement-item">
+                                        <div class="achievement-icon">🌌</div>
+                                        <div class="achievement-details">
+                                            <h5 class="text-white">Galaxy Master</h5>
+                                            <p class="text-white-50">Strong vocabulary gains</p>
+                                        </div>
+                                    </div>
+                                    <div class="achievement-item">
+                                        <div class="achievement-icon">👻</div>
+                                        <div class="achievement-details">
+                                            <h5 class="text-white">Ghost Writer</h5>
+                                            <p class="text-white-50">Spooky story master</p>
+                                        </div>
+                                    </div>
+                                    <div class="achievement-item">
+                                        <div class="achievement-icon">🛸</div>
+                                        <div class="achievement-details">
+                                            <h5 class="text-white">UFO Pilot</h5>
+                                            <p class="text-white-50">Out of this world stories</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Writing Analysis -->
+                        <div class="card mb-4 space-adventure-card">
+                            <div class="card-body">
+                                <h4>Space Analysis</h4>
+                                <div id="space-adventure-writing-analysis">
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 0%" 
+                                             id="space-adventure-grammar-score" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                            Grammar
+                                        </div>
+                                    </div>
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: 0%" 
+                                             id="space-adventure-vocabulary-score" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                            Vocabulary
+                                        </div>
+                                    </div>
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" 
+                                             id="space-adventure-creativity-score" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                            Creativity
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Character Quotes -->
+                        <div class="card mb-4 space-adventure-card">
+                            <div class="card-body">
+                                <h4>Character Quotes</h4>
+                                <div id="character-quotes">
+                                    <div class="quote-item">
+                                        <div class="quote-text">"Ohhhh, that's a totally awesome story idea, dude!"</div>
+                                        <div class="quote-character">- Mordecai</div>
+                                        <button class="btn btn-sm btn-outline-primary use-quote">Use</button>
+                                    </div>
+                                    <div class="quote-item">
+                                        <div class="quote-text">"No way! That's like, the coolest thing ever!"</div>
+                                        <div class="quote-character">- Rigby</div>
+                                        <button class="btn btn-sm btn-outline-primary use-quote">Use</button>
+                                    </div>
+                                    <div class="quote-item">
+                                        <div class="quote-text">"High five! That's a spooktacular idea!"</div>
+                                        <div class="quote-character">- High Five Ghost</div>
+                                        <button class="btn btn-sm btn-outline-primary use-quote">Use</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parent Portal Tab Content -->
+        <div class="tab-pane fade" id="parent-portal" role="tabpanel">
             <div class="row">
-                <div class="col-md-3 mb-2">
-                    <button class="btn btn-outline-secondary w-100" data-challenge="silent_letters">
-                        Silent Letters
-                    </button>
+                <!-- Quick Insights Dashboard -->
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4>Quick Insights</h4>
+                            <div class="progress mb-3">
+                                <div class="progress-bar" role="progressbar" style="width: 75%">
+                                    Weekly Writing Progress
+                                </div>
+                            </div>
+                            <div class="activity-feed">
+                                <h5>Recent Activity</h5>
+                                <div class="activity-item">
+                                    <i class="fas fa-pencil-alt text-primary"></i>
+                                    <span>Completed Space Adventure Story</span>
+                                </div>
+                                <div class="activity-item">
+                                    <i class="fas fa-star text-warning"></i>
+                                    <span>Earned "Creative Writer" Badge</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Support Tools -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4>Quick Support Tools</h4>
+                            <div class="support-tools">
+                                <button class="btn btn-outline-primary mb-2 w-100">
+                                    <i class="fas fa-lightbulb"></i> 5-Minute Writing Activities
+                                </button>
+                                <button class="btn btn-outline-success mb-2 w-100">
+                                    <i class="fas fa-comments"></i> Conversation Cards
+                                </button>
+                                <button class="btn btn-outline-info mb-2 w-100">
+                                    <i class="fas fa-star"></i> Strength Spotlights
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-3 mb-2">
-                    <button class="btn btn-outline-secondary w-100" data-challenge="double_consonants">
-                        Double Consonants
-                    </button>
+
+                <!-- Progress Monitoring -->
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4>Progress Monitoring</h4>
+                            <div class="skill-mastery-map">
+                                <h5>Skill Mastery</h5>
+                                <div class="skill-item">
+                                    <span>Creative Writing</span>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" style="width: 85%"></div>
+                                    </div>
+                                </div>
+                                <div class="skill-item">
+                                    <span>Grammar</span>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-info" style="width: 70%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="achievement-timeline mt-3">
+                                <h5>Recent Achievements</h5>
+                                <div class="timeline-item">
+                                    <i class="fas fa-trophy text-warning"></i>
+                                    <span>Level 5 Writer</span>
+                                </div>
+                                <div class="timeline-item">
+                                    <i class="fas fa-medal text-primary"></i>
+                                    <span>Story Master</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-3 mb-2">
-                    <button class="btn btn-outline-secondary w-100" data-challenge="ie_ei_words">
-                        I before E
-                    </button>
+
+                <!-- Communication Center -->
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4>Communication Center</h4>
+                            <div class="message-center">
+                                <div class="teacher-message mb-3">
+                                    <h5>Latest Teacher Note</h5>
+                                    <p class="text-muted">Great progress on creative writing!</p>
+                                </div>
+                                <button class="btn btn-primary mb-2 w-100">
+                                    <i class="fas fa-envelope"></i> Send Quick Note
+                                </button>
+                                <button class="btn btn-outline-primary mb-2 w-100">
+                                    <i class="fas fa-calendar"></i> Schedule Conference
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-3 mb-2">
-                    <button class="btn btn-outline-secondary w-100" data-challenge="homophones">
-                        Homophones
-                    </button>
+            </div>
+        </div>
+
+        <!-- Teacher Portal Tab Content -->
+        <div class="tab-pane fade" id="teacher-portal" role="tabpanel">
+            <div class="row">
+                <!-- Dashboard & Analytics -->
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4>Class Writing Pulse</h4>
+                            <div class="class-activity">
+                                <div class="activity-stats">
+                                    <div class="stat-item">
+                                        <h5>Active Writers</h5>
+                                        <span class="h3">12</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <h5>Completed Today</h5>
+                                        <span class="h3">8</span>
+                                    </div>
+                                </div>
+                                <div class="skill-gap-alert mt-3">
+                                    <h5>Skill Gaps</h5>
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        3 students need help with grammar
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Management -->
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4>Content Management</h4>
+                            <div class="content-tools">
+                                <button class="btn btn-primary mb-2 w-100">
+                                    <i class="fas fa-plus"></i> Create New Prompt
+                                </button>
+                                <button class="btn btn-outline-primary mb-2 w-100">
+                                    <i class="fas fa-tasks"></i> Assignment Sequencer
+                                </button>
+                                <button class="btn btn-outline-success mb-2 w-100">
+                                    <i class="fas fa-book"></i> Writing Sample Library
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assessment Tools -->
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4>Assessment Tools</h4>
+                            <div class="assessment-tools">
+                                <button class="btn btn-primary mb-2 w-100">
+                                    <i class="fas fa-robot"></i> Smart Evaluator
+                                </button>
+                                <button class="btn btn-outline-primary mb-2 w-100">
+                                    <i class="fas fa-comments"></i> Bulk Feedback
+                                </button>
+                                <button class="btn btn-outline-info mb-2 w-100">
+                                    <i class="fas fa-chart-line"></i> Progress Tracker
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
+<style>
+/* Space Adventure Theme */
+.space-adventure-background {
+    position: relative;
+    min-height: 100vh;
+    background: #000;
+    overflow: hidden;
+    padding: 20px;
+}
+
+.stars, .twinkling, .clouds {
+    position: absolute;
+    display: block;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.stars {
+    background: #000 url('https://i.imgur.com/YKY28eT.png') repeat top center;
+    z-index: 0;
+}
+
+.twinkling {
+    background: transparent url('https://i.imgur.com/XYMF4ca.png') repeat top center;
+    z-index: 1;
+    animation: move-twink-back 200s linear infinite;
+}
+
+.clouds {
+    background: transparent url('https://i.imgur.com/mHbScrQ.png') repeat top center;
+    z-index: 2;
+    opacity: .4;
+    animation: move-clouds-back 200s linear infinite;
+}
+
+@keyframes move-twink-back {
+    from {background-position: 0 0;}
+    to {background-position: -10000px 5000px;}
+}
+
+@keyframes move-clouds-back {
+    from {background-position: 0 0;}
+    to {background-position: 10000px 0;}
+}
+
+.space-adventure-card {
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.8) 0%, rgba(22, 33, 62, 0.8) 100%);
+    color: #fff;
+    border: 2px solid #4a90e2;
+    backdrop-filter: blur(5px);
+    position: relative;
+    z-index: 10;
+}
+
+.space-adventure-prompt {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: #fff;
+    border: none;
+}
+
+.space-adventure-character-animation {
+    min-height: 200px;
+    background: linear-gradient(135deg, #000428 0%, #004e92 100%);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.tip-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: rgba(74, 144, 226, 0.1);
+    border-radius: 5px;
+}
+
+.tip-item i {
+    margin-right: 10px;
+}
+
+#space-adventure-achievement-progress .achievement-item {
+    background: rgba(74, 144, 226, 0.1);
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.progress {
+    background: rgba(255, 255, 255, 0.1);
+    height: 25px;
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+.character-container {
+    position: relative;
+    height: 150px;
+    width: 150px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+.character-img {
+    transition: all 0.3s ease;
+    border: 3px solid #4a90e2;
+    box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
+    width: 150px !important;
+    height: 150px !important;
+    object-fit: cover !important;
+    display: block !important;
+    margin: 0 auto !important;
+}
+
+.character-btn {
+    margin: 0 2px;
+    background: rgba(74, 144, 226, 0.2);
+    color: #fff;
+    border-color: #4a90e2;
+}
+
+.character-btn.active {
+    background: #4a90e2;
+    color: #fff;
+}
+
+/* Animation for character switching */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* Power-ups styling */
+.power-ups-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.power-up-item {
+    display: flex;
+    align-items: center;
+    background: rgba(74, 144, 226, 0.1);
+    padding: 10px;
+    border-radius: 5px;
+    border-left: 3px solid #4a90e2;
+}
+
+.power-up-icon {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.power-up-details {
+    flex-grow: 1;
+}
+
+.power-up-details h5 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.power-up-details p {
+    margin: 0;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* Adventure elements styling */
+.adventure-elements-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.adventure-element-item {
+    background: rgba(74, 144, 226, 0.1);
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.adventure-element-item h5 {
+    margin-top: 0;
+    font-size: 16px;
+}
+
+.adventure-element-content {
+    min-height: 60px;
+    margin-bottom: 10px;
+}
+
+/* Character quotes styling */
+.quote-item {
+    background: rgba(74, 144, 226, 0.1);
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border-left: 3px solid #4a90e2;
+}
+
+.quote-text {
+    font-style: italic;
+    margin-bottom: 5px;
+}
+
+.quote-character {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-bottom: 5px;
+}
+
+/* Writing tools styling */
+.space-adventure-writing-tools {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+/* Confetti animation */
+@keyframes confetti {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Space Adventure Theme */
+.space-adventure-card .text-white {
+    color: #ffffff !important;
+}
+
+.space-adventure-card #character-name,
+.space-adventure-card #character-message {
+    color: #ffffff !important;
+}
+
+/* Parent Portal Styles */
+.activity-feed {
+    margin-top: 15px;
+}
+
+.activity-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.activity-item i {
+    margin-right: 10px;
+}
+
+.support-tools .btn {
+    text-align: left;
+}
+
+.support-tools .btn i {
+    margin-right: 10px;
+}
+
+.skill-item {
+    margin-bottom: 15px;
+}
+
+.timeline-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.timeline-item i {
+    margin-right: 10px;
+}
+
+/* Teacher Portal Styles */
+.class-activity {
+    padding: 15px;
+}
+
+.activity-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-item h5 {
+    margin-bottom: 5px;
+    color: #666;
+}
+
+.content-tools .btn,
+.assessment-tools .btn {
+    text-align: left;
+}
+
+.content-tools .btn i,
+.assessment-tools .btn i {
+    margin-right: 10px;
+}
+</style>
+
 <script src="/static/data/word_database.js"></script>
 <script>
-    let currentExercise = {{ exercise|tojson }};
-    let isAnswerSubmitted = false;
-    let currentDifficulty = "intermediate";
-    let currentCategory = "";
-    let currentExerciseType = "word";
+window.currentExercise = {{ exercise|tojson }};
+let isAnswerSubmitted = false;
+let currentDifficulty = "intermediate";
+let currentCategory = "";
+let currentExerciseType = "word";
+
+// Speech Recognition Setup
+let recognition = null;
+let isRecording = false;
+let lastResponse = '';
+
+if ('webkitSpeechRecognition' in window) {
+    recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
     
-    document.addEventListener('DOMContentLoaded', function() {
-        // Set up event listeners
-        document.getElementById('listen-btn').addEventListener('click', playAudio);
-        document.getElementById('submit-answer-btn').addEventListener('click', checkAnswer);
-        document.getElementById('next-exercise-btn').addEventListener('click', getNewExercise);
-        document.getElementById('new-exercise-btn').addEventListener('click', getNewExercise);
-        
-        // Allow pressing Enter to submit
-        document.getElementById('spelling-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                checkAnswer();
-            }
-        });
-        
-        document.getElementById('phrase-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                checkAnswer();
-            }
-        });
-        
-        // Set up difficulty selector
-        document.getElementById('difficulty-selector').addEventListener('change', function() {
-            currentDifficulty = this.value;
-            if (currentExerciseType === 'word') {
-                updateCategorySelector(currentDifficulty);
-            }
-        });
-        
-        // Set up exercise type selector
-        document.getElementById('exercise-type-selector').addEventListener('change', function() {
-            currentExerciseType = this.value;
-            updateExerciseTypeUI(currentExerciseType);
-        });
-        
-        // Set up category selector
-        document.getElementById('category-selector').addEventListener('change', function() {
-            currentCategory = this.value;
-        });
-        
-        // Set up challenge buttons
-        document.querySelectorAll('[data-challenge]').forEach(button => {
-            button.addEventListener('click', function() {
-                const challengeType = this.getAttribute('data-challenge');
-                loadChallengeExercise(challengeType);
-            });
-        });
-        
-        // Initialize category selector
-        updateCategorySelector(currentDifficulty);
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        handleVoiceInput(transcript);
+    };
+    
+    recognition.onend = function() {
+        isRecording = false;
+        document.getElementById('recording-status').style.display = 'none';
+        document.getElementById('companion-voice').innerHTML = '<i class="fas fa-microphone"></i> Ask for Help';
+    };
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up event listeners
+    document.getElementById('listen-btn').addEventListener('click', playAudio);
+    document.getElementById('submit-answer-btn').addEventListener('click', checkAnswer);
+    document.getElementById('next-exercise-btn').addEventListener('click', getNewExercise);
+    document.getElementById('new-exercise-btn').addEventListener('click', getNewExercise);
+    
+    // Allow pressing Enter to submit
+    document.getElementById('spelling-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            checkAnswer();
+        }
     });
     
-    function updateExerciseTypeUI(type) {
-        const categorySelector = document.getElementById('category-selector');
-        const challengeSection = document.getElementById('challenge-section');
-        const exerciseTitle = document.getElementById('exercise-title');
-        const listenLabel = document.getElementById('listen-label');
-        const wordInputContainer = document.getElementById('word-input-container');
-        const phraseInputContainer = document.getElementById('phrase-input-container');
-        
-        if (type === 'word') {
-            exerciseTitle.textContent = 'Spelling Exercise';
-            listenLabel.textContent = 'Listen to the word';
-            categorySelector.disabled = false;
-            challengeSection.classList.remove('d-none');
-            wordInputContainer.classList.remove('d-none');
-            phraseInputContainer.classList.add('d-none');
-            updateCategorySelector(currentDifficulty);
-        } else {
-            exerciseTitle.textContent = 'Dictation Exercise';
-            listenLabel.textContent = 'Listen to the phrase';
-            categorySelector.disabled = true;
-            challengeSection.classList.add('d-none');
-            wordInputContainer.classList.add('d-none');
-            phraseInputContainer.classList.remove('d-none');
+    document.getElementById('phrase-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && e.ctrlKey) {
+            checkAnswer();
         }
-        
-        // Get a new exercise based on the selected type
-        getNewExercise();
+    });
+    
+    // Set up difficulty selector
+    document.getElementById('difficulty-selector').addEventListener('change', function() {
+        currentDifficulty = this.value;
+        if (currentExerciseType === 'word') {
+            updateCategorySelector(currentDifficulty);
+        }
+    });
+    
+    // Set up exercise type selector
+    document.getElementById('exercise-type-selector').addEventListener('change', function() {
+        currentExerciseType = this.value;
+        updateExerciseTypeUI(currentExerciseType);
+    });
+    
+    // Set up category selector
+    document.getElementById('category-selector').addEventListener('change', function() {
+        currentCategory = this.value;
+    });
+    
+    // Set up challenge buttons
+    document.querySelectorAll('[data-challenge]').forEach(button => {
+        button.addEventListener('click', function() {
+            const challengeType = this.getAttribute('data-challenge');
+            loadChallengeExercise(challengeType);
+        });
+    });
+    
+    // Initialize category selector
+    updateCategorySelector(currentDifficulty);
+});
+
+function updateExerciseTypeUI(type) {
+    const categorySelector = document.getElementById('category-selector');
+    const challengeSection = document.getElementById('challenge-section');
+    const exerciseTitle = document.getElementById('exercise-title');
+    const listenLabel = document.getElementById('listen-label');
+    const wordInputContainer = document.getElementById('word-input-container');
+    const phraseInputContainer = document.getElementById('phrase-input-container');
+    
+    if (type === 'word') {
+        exerciseTitle.textContent = 'Spelling Exercise';
+        listenLabel.textContent = 'Listen to the word';
+        categorySelector.disabled = false;
+        challengeSection.classList.remove('d-none');
+        wordInputContainer.classList.remove('d-none');
+        phraseInputContainer.classList.add('d-none');
+        updateCategorySelector(currentDifficulty);
+    } else {
+        exerciseTitle.textContent = 'Dictation Exercise';
+        listenLabel.textContent = 'Listen to the phrase';
+        categorySelector.disabled = true;
+        challengeSection.classList.add('d-none');
+        wordInputContainer.classList.add('d-none');
+        phraseInputContainer.classList.remove('d-none');
     }
     
-    function updateCategorySelector(difficulty) {
-        const categorySelector = document.getElementById('category-selector');
-        
-        if (currentExerciseType !== 'word') {
-            while (categorySelector.options.length > 1) {
-                categorySelector.remove(1);
-            }
-            return;
-        }
-        
-        const categories = getCategoriesForLevel(difficulty);
-        
-        // Clear current options except the first one
+    // Get a new exercise based on the selected type
+    getNewExercise();
+}
+
+function updateCategorySelector(difficulty) {
+    const categorySelector = document.getElementById('category-selector');
+    
+    if (currentExerciseType !== 'word') {
         while (categorySelector.options.length > 1) {
             categorySelector.remove(1);
         }
-        
-        // Add new options
-        categories.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category;
-            option.textContent = category.charAt(0).toUpperCase() + category.slice(1);
-            categorySelector.appendChild(option);
-        });
+        return;
     }
     
-    function playAudio() {
-        if ('speechSynthesis' in window) {
-            const textToSpeak = currentExerciseType === 'word' 
-                ? currentExercise.target_word 
-                : currentExercise.target_text;
-                
-            const utterance = new SpeechSynthesisUtterance(textToSpeak);
-            utterance.rate = 0.8; // Slow down a bit for clarity
-            window.speechSynthesis.speak(utterance);
-        } else {
-            // Fallback if speech synthesis is not available
-            alert(`The ${currentExerciseType} is: ${currentExerciseType === 'word' ? currentExercise.target_word : currentExercise.target_text}`);
-        }
+    const categories = getCategoriesForLevel(difficulty);
+    
+    // Clear current options except the first one
+    while (categorySelector.options.length > 1) {
+        categorySelector.remove(1);
     }
     
-    function checkAnswer() {
-        if (isAnswerSubmitted) {
-            return;
-        }
-        
-        // Get the user's answer based on exercise type
-        const userAnswer = currentExerciseType === 'word' 
-            ? document.getElementById('spelling-input').value.trim() 
-            : document.getElementById('phrase-input').value.trim();
-            
-        const targetText = currentExerciseType === 'word' 
+    // Add new options
+    categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+        categorySelector.appendChild(option);
+    });
+}
+
+function playAudio() {
+    if ('speechSynthesis' in window) {
+        const textToSpeak = currentExerciseType === 'word' 
             ? currentExercise.target_word 
             : currentExercise.target_text;
+            
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.rate = 0.8; // Slow down a bit for clarity
+        window.speechSynthesis.speak(utterance);
+    } else {
+        // Fallback if speech synthesis is not available
+        alert(`The ${currentExerciseType} is: ${currentExerciseType === 'word' ? currentExercise.target_word : currentExercise.target_text}`);
+    }
+}
+
+function checkAnswer() {
+    if (isAnswerSubmitted) {
+        return;
+    }
+    
+    // Get the user's answer based on exercise type
+    const userAnswer = currentExerciseType === 'word' 
+        ? document.getElementById('spelling-input').value.trim() 
+        : document.getElementById('phrase-input').value.trim();
         
-        if (!userAnswer) {
-            alert('Please enter your answer first');
-            return;
-        }
+    const targetText = currentExerciseType === 'word' 
+        ? currentExercise.target_word 
+        : currentExercise.target_text;
+    
+    if (!userAnswer) {
+        alert('Please enter your answer first');
+        return;
+    }
+    
+    // Show feedback container
+    document.getElementById('feedback-container').style.display = 'block';
+    
+    // Check if answer is correct (case insensitive)
+    const isCorrect = userAnswer.toLowerCase() === targetText.toLowerCase();
+    
+    if (isCorrect) {
+        document.getElementById('correct-feedback').classList.remove('d-none');
+        document.getElementById('incorrect-feedback').classList.add('d-none');
+    } else {
+        document.getElementById('correct-feedback').classList.add('d-none');
+        document.getElementById('incorrect-feedback').classList.remove('d-none');
+        document.getElementById('correct-text').innerText = targetText;
         
-        // Show feedback container
-        document.getElementById('feedback-container').style.display = 'block';
-        
-        // Check if answer is correct (case insensitive)
-        const isCorrect = userAnswer.toLowerCase() === targetText.toLowerCase();
-        
-        if (isCorrect) {
-            document.getElementById('correct-feedback').classList.remove('d-none');
-            document.getElementById('incorrect-feedback').classList.add('d-none');
+        // Show spelling rule hint based on word type
+        document.getElementById('spelling-rule').classList.remove('d-none');
+        if (currentExercise.note) {
+            document.getElementById('spelling-rule-text').innerText = currentExercise.note;
         } else {
-            document.getElementById('correct-feedback').classList.add('d-none');
-            document.getElementById('incorrect-feedback').classList.remove('d-none');
-            document.getElementById('correct-text').innerText = targetText;
-            
-            // Show spelling rule hint based on word type
-            document.getElementById('spelling-rule').classList.remove('d-none');
-            if (currentExercise.note) {
-                document.getElementById('spelling-rule-text').innerText = currentExercise.note;
-            } else {
-                document.getElementById('spelling-rule-text').innerText = 
-                    currentExerciseType === 'word' 
-                        ? "Try sounding out the word by syllables, and remember to check your spelling carefully." 
-                        : "Try listening to the phrase again and pay attention to every word.";
-            }
+            document.getElementById('spelling-rule-text').innerText = 
+                currentExerciseType === 'word' 
+                    ? "Try sounding out the word by syllables, and remember to check your spelling carefully." 
+                    : "Try listening to the phrase again and pay attention to every word.";
         }
+    }
+    
+    // Send to server for detailed analysis
+    fetch('/check_spelling', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            answer: userAnswer,
+            target_text: targetText,
+            exercise_type: currentExerciseType
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Update character feedback
+        const characterFeedback = document.getElementById('character-feedback');
+        characterFeedback.innerHTML = '';
         
-        // Send to server for detailed analysis
-        fetch('/check_spelling', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                answer: userAnswer,
-                target_text: targetText,
-                exercise_type: currentExerciseType
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Update character feedback
-            const characterFeedback = document.getElementById('character-feedback');
-            characterFeedback.innerHTML = '';
+        data.comparison.forEach(item => {
+            let charSpan = '';
             
-            data.comparison.forEach(item => {
-                let charSpan = '';
-                
-                if (item.status === 'correct') {
-                    charSpan = `<span class="char-correct">${item.char}</span>`;
-                } else if (item.status === 'incorrect') {
-                    charSpan = `<span class="char-incorrect">${item.char}</span>`;
-                } else if (item.status === 'missing') {
-                    charSpan = `<span class="char-missing">${item.char}</span>`;
-                } else if (item.status === 'extra') {
-                    charSpan = `<span class="char-extra">${item.user_char}</span>`;
-                }
-                
-                characterFeedback.innerHTML += charSpan;
-            });
-            
-            // Update spelling rule if provided from server
-            if (data.feedback && !isCorrect) {
-                document.getElementById('spelling-rule-text').innerText = data.feedback;
+            if (item.status === 'correct') {
+                charSpan = `<span class="char-correct">${item.char}</span>`;
+            } else if (item.status === 'incorrect') {
+                charSpan = `<span class="char-incorrect">${item.char}</span>`;
+            } else if (item.status === 'missing') {
+                charSpan = `<span class="char-missing">${item.char}</span>`;
+            } else if (item.status === 'extra') {
+                charSpan = `<span class="char-extra">${item.user_char}</span>`;
             }
-        })
-        .catch(error => {
-            console.error('Error checking answer:', error);
+            
+            characterFeedback.innerHTML += charSpan;
         });
         
-        isAnswerSubmitted = true;
-    }
-    
-    function getNewExercise() {
-        isAnswerSubmitted = false;
-        document.getElementById('feedback-container').style.display = 'none';
-        document.getElementById('spelling-input').value = '';
-        document.getElementById('phrase-input').value = '';
-        
-        if (currentExerciseType === 'word') {
-            // Get a new word exercise
-            const wordInfo = getRandomWord(currentDifficulty, currentCategory || null);
-            
-            // Update the current exercise
-            currentExercise = {
-                instruction: "Listen to the word and type it correctly.",
-                target_word: wordInfo.word,
-                hint: wordInfo.hint,
-                note: wordInfo.note || null
-            };
-            
-            // Update the UI
-            document.getElementById('exercise-instruction').textContent = currentExercise.instruction;
-            document.getElementById('word-hint').innerHTML = `<em>Hint: ${currentExercise.hint}</em>`;
-        } else {
-            // Get a new phrase exercise
-            const phraseInfo = getRandomPhrase(currentDifficulty);
-            
-            // Update the current exercise
-            currentExercise = {
-                instruction: "Listen to the phrase and type it exactly as you hear it.",
-                target_text: phraseInfo.text,
-                hint: phraseInfo.hint
-            };
-            
-            // Update the UI
-            document.getElementById('exercise-instruction').textContent = currentExercise.instruction;
-            document.getElementById('word-hint').innerHTML = `<em>Hint: ${currentExercise.hint}</em>`;
+        // Update spelling rule if provided from server
+        if (data.feedback && !isCorrect) {
+            document.getElementById('spelling-rule-text').innerText = data.feedback;
         }
-    }
+    })
+    .catch(error => {
+        console.error('Error checking answer:', error);
+    });
     
-    function loadChallengeExercise(challengeType) {
-        if (currentExerciseType !== 'word') {
-            return;
-        }
-        
-        isAnswerSubmitted = false;
-        document.getElementById('feedback-container').style.display = 'none';
-        document.getElementById('spelling-input').value = '';
-        
-        // Get a challenge word
-        const wordInfo = getChallengeWord(challengeType);
+    isAnswerSubmitted = true;
+}
+
+function getNewExercise() {
+    isAnswerSubmitted = false;
+    document.getElementById('feedback-container').style.display = 'none';
+    document.getElementById('spelling-input').value = '';
+    document.getElementById('phrase-input').value = '';
+    
+    if (currentExerciseType === 'word') {
+        // Get a new word exercise
+        const wordInfo = getRandomWord(currentDifficulty, currentCategory || null);
         
         // Update the current exercise
         currentExercise = {
@@ -420,6 +1360,666 @@
         // Update the UI
         document.getElementById('exercise-instruction').textContent = currentExercise.instruction;
         document.getElementById('word-hint').innerHTML = `<em>Hint: ${currentExercise.hint}</em>`;
+    } else {
+        // Get a new phrase exercise
+        const phraseInfo = getRandomPhrase(currentDifficulty);
+        
+        // Update the current exercise
+        currentExercise = {
+            instruction: "Listen to the phrase and type it exactly as you hear it.",
+            target_text: phraseInfo.text,
+            hint: phraseInfo.hint
+        };
+        
+        // Update the UI
+        document.getElementById('exercise-instruction').textContent = currentExercise.instruction;
+        document.getElementById('word-hint').innerHTML = `<em>Hint: ${currentExercise.hint}</em>`;
     }
+}
+
+function loadChallengeExercise(challengeType) {
+    if (currentExerciseType !== 'word') {
+        return;
+    }
+    
+    isAnswerSubmitted = false;
+    document.getElementById('feedback-container').style.display = 'none';
+    document.getElementById('spelling-input').value = '';
+    
+    // Get a challenge word
+    const wordInfo = getChallengeWord(challengeType);
+    
+    // Update the current exercise
+    currentExercise = {
+        instruction: "Listen to the word and type it correctly.",
+        target_word: wordInfo.word,
+        hint: wordInfo.hint,
+        note: wordInfo.note || null
+    };
+    
+    // Update the UI
+    document.getElementById('exercise-instruction').textContent = currentExercise.instruction;
+    document.getElementById('word-hint').innerHTML = `<em>Hint: ${currentExercise.hint}</em>`;
+}
+
+// Handle microphone button click
+document.getElementById('companion-voice').onclick = function() {
+    if (!recognition) {
+        alert('Speech recognition is not supported in your browser. Please try Chrome or Edge.');
+        return;
+    }
+    
+    if (!isRecording) {
+        recognition.start();
+        isRecording = true;
+        document.getElementById('recording-status').style.display = 'block';
+        document.getElementById('companion-voice').innerHTML = '<i class="fas fa-stop"></i> Stop Recording';
+    } else {
+        recognition.stop();
+    }
+};
+
+// Handle voice input
+function handleVoiceInput(transcript) {
+    const responses = [
+        "Let me help you brainstorm some ideas! Try writing about what you see outside your window.",
+        "Remember to use descriptive words to make your story more interesting!",
+        "Start with a strong opening sentence to grab your reader's attention.",
+        "Don't worry about making it perfect - just get your ideas down first!",
+        "Try using the five senses in your writing: sight, sound, smell, taste, and touch.",
+        "Break your story into small parts - beginning, middle, and end.",
+        "Use dialogue to make your characters come alive!",
+        "Add some action words to make your story more exciting!"
+    ];
+    
+    lastResponse = responses[Math.floor(Math.random() * responses.length)];
+    document.getElementById('companion-message').textContent = '🦉: ' + lastResponse;
+    document.getElementById('play-voice').style.display = 'inline-block';
+}
+
+// Handle play button click
+document.getElementById('play-voice').onclick = function() {
+    if ('speechSynthesis' in window && lastResponse) {
+        const utterance = new SpeechSynthesisUtterance(lastResponse);
+        utterance.rate = 0.9; // Slightly slower for clarity
+        window.speechSynthesis.speak(utterance);
+    }
+};
+
+// --- MOCK DATA POPULATION ---
+// Writing Strengths
+const strengthMap = document.getElementById('strength-map');
+strengthMap.innerHTML = `
+  <div class="strength-item" style="border-color:#1976d2"><div class="strength-icon" style="color:#1976d2">📝</div><div><span class="strength-star">★</span> <b>Vocabulary</b></div><div class="strength-example">Used "astonishing" in a story.</div></div>
+  <div class="strength-item" style="border-color:#43a047"><div class="strength-icon" style="color:#43a047">🔤</div><div><span class="strength-star">★</span> <b>Grammar</b></div><div class="strength-example">Always uses capital letters.</div></div>
+  <div class="strength-item" style="border-color:#fbc02d"><div class="strength-icon" style="color:#fbc02d">📐</div><div><span class="strength-star">★</span> <b>Structure</b></div><div class="strength-example">Paragraphs start with topic sentences.</div></div>
+  <div class="strength-item" style="border-color:#8e24aa"><div class="strength-icon" style="color:#8e24aa">🌟</div><div><span class="strength-star">★</span> <b>Creativity</b></div><div class="strength-example">Described a dragon as "shimmering like a rainbow".</div></div>
+`;
+// Achievement Progress
+const achievementProgress = document.getElementById('achievement-progress');
+achievementProgress.innerHTML = `
+  <div class="achievement-item"><div class="achievement-icon">🏅</div><div class="achievement-details"><h5>Word Wizard</h5><p>Mastered basic vocabulary</p></div></div>
+  <div class="achievement-item"><div class="achievement-icon">🥈</div><div class="achievement-details"><h5>Sentence Sculptor</h5><p>Varied sentences with description</p></div></div>
+  <div class="achievement-item"><div class="achievement-icon">🥉</div><div class="achievement-details"><h5>Paragraph Pro</h5><p>Organized paragraphs</p></div></div>
+`;
+// Writing Analysis
+const writingAnalysis = document.getElementById('writing-analysis');
+writingAnalysis.innerHTML = `
+  <div class="progress mb-3"><div class="progress-bar" style="width: 90%; background: linear-gradient(90deg,#1976d2 60%,#ffd600 100%);">🔤 Grammar 90%</div></div>
+  <div class="progress mb-3"><div class="progress-bar" style="width: 85%; background: linear-gradient(90deg,#43a047 60%,#ffd600 100%);">📝 Vocabulary 85%</div></div>
+  <div class="progress mb-3"><div class="progress-bar" style="width: 80%; background: linear-gradient(90deg,#fbc02d 60%,#ffd600 100%);">📐 Structure 80%</div></div>
+  <div class="progress mb-3"><div class="progress-bar" style="width: 88%; background: linear-gradient(90deg,#8e24aa 60%,#ffd600 100%);">🗂️ Organization 88%</div></div>
+`;
+// Recent Achievements
+const recentAchievements = document.getElementById('recent-achievements');
+recentAchievements.innerHTML = `
+  <div class="achievement-item"><div class="achievement-icon">🎉</div><div class="achievement-details"><h5>Milestone!</h5><p>Wrote 10 stories</p></div></div>
+  <div class="achievement-item"><div class="achievement-icon">📚</div><div class="achievement-details"><h5>Book Lover</h5><p>Wrote about favorite book</p></div></div>
+  <div class="achievement-item"><div class="achievement-icon">🏆</div><div class="achievement-details"><h5>Top Writer</h5><p>Highest score this week</p></div></div>
+`;
+// Writing Prompts Array
+const writingPrompts = [
+    { 
+        text: '🐉 Write about a magical dragon adventure!', 
+        emojis: ['🐉', '✨', '🏰', '🔮']
+    },
+    { 
+        text: '🚀 Write about an astronaut exploring Mars!', 
+        emojis: ['🚀', '👨‍🚀', '🌍', '🛰️']
+    },
+    { 
+        text: '🦕 Create a story about discovering a living dinosaur!', 
+        emojis: ['🦕', '🔍', '🌴', '🌋']
+    },
+    { 
+        text: '🧙‍♂️ Write about a day in the life of a wizard school!', 
+        emojis: ['🧙‍♂️', '📚', '⚡', '🔮']
+    },
+    { 
+        text: '🌊 Describe an underwater city of the future!', 
+        emojis: ['🌊', '🏙️', '🐠', '🤖']
+    },
+    { 
+        text: '🎪 Write about a magical circus that only appears at midnight!', 
+        emojis: ['🎪', '🎭', '✨', '🌙']
+    },
+    { 
+        text: '🎮 Create a story about being trapped inside a video game!', 
+        emojis: ['🎮', '👾', '💫', '🎲']
+    },
+    { 
+        text: '🌳 Write about a tree that can grant wishes!', 
+        emojis: ['🌳', '✨', '🍃', '🌟']
+    },
+    { 
+        text: '🎨 Describe a world where paintings come to life!', 
+        emojis: ['🎨', '🖼️', '✨', '🌈']
+    },
+    { 
+        text: '🧚 Write about a fairy garden hidden in your backyard!', 
+        emojis: ['🧚', '🌸', '🦋', '✨']
+    },
+    { 
+        text: '🎭 Create a story about a theater where the audience becomes part of the play!', 
+        emojis: ['🎭', '🎪', '👥', '✨']
+    },
+    { 
+        text: '🎪 Write about a circus where all the performers are robots!', 
+        emojis: ['🎪', '🤖', '🎭', '✨']
+    }
+];
+
+let currentPromptIndex = 0;
+
+// Topic Generation
+document.getElementById('topic-generate').onclick = function() {
+    // Cycle through prompts
+    currentPromptIndex = (currentPromptIndex + 1) % writingPrompts.length;
+    const currentPrompt = writingPrompts[currentPromptIndex];
+    
+    // Update writing prompt with animation
+    const writingPrompt = document.getElementById('writing-prompt');
+    writingPrompt.style.opacity = '0';
+    setTimeout(() => {
+        writingPrompt.innerHTML = currentPrompt.text;
+        writingPrompt.style.opacity = '1';
+    }, 300);
+    
+    // Animate story animator
+    const animatorDiv = document.getElementById('story-animator-svg').parentElement;
+    animatorDiv.innerHTML = `
+        <h4>Story Animator</h4>
+        <div style="text-align: center; font-size: 4rem;">
+            ${currentPrompt.emojis.map(emoji => 
+                `<span style="display:inline-block; margin:0 10px; animation: float 2s ease-in-out infinite alternate;">${emoji}</span>`
+            ).join('')}
+        </div>
+    `;
+    
+    // Add floating animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-20px); }
+        }
+    `;
+    document.head.appendChild(style);
+};
+
+document.getElementById('writing-submit').onclick = function() {
+    // Trigger confetti animation
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti-piece';
+        confetti.style.position = 'fixed';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.top = '-20px';
+        confetti.style.width = '16px';
+        confetti.style.height = '16px';
+        confetti.style.borderRadius = '50%';
+        confetti.style.background = `hsl(${Math.random()*360},90%,60%)`;
+        confetti.style.zIndex = '9999';
+        confetti.style.pointerEvents = 'none';
+        confetti.style.animation = 'confetti 1.2s linear forwards';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 1300);
+    }
+    
+    // Update companion message
+    document.getElementById('companion-message').textContent = '🦉: Great job! Your writing is amazing!';
+    document.getElementById('companion-avatar').classList.add('celebration');
+    setTimeout(() => {
+        document.getElementById('companion-avatar').classList.remove('celebration');
+    }, 800);
+};
+
+document.getElementById('writing-save').onclick = function() {
+    alert('Draft Saved! 📝');
+};
+// --- END MOCK DATA ---
+
+// Space Adventure Writing Prompts
+const spaceAdventurePrompts = [
+    { 
+        text: '🚀 Write about a space adventure with Mordecai and Rigby!', 
+        emojis: ['🚀', '👾', '💫', '🌌']
+    },
+    { 
+        text: '🎸 Create a story about a magical guitar solo in space!', 
+        emojis: ['🎸', '⚡', '🎵', '🌟']
+    },
+    { 
+        text: '👻 Tell a story about High Five Ghost exploring a haunted planet!', 
+        emojis: ['👻', '✨', '🌙', '🌍']
+    },
+    { 
+        text: '🎮 Write about a video game tournament in the park!', 
+        emojis: ['🎮', '👾', '💫', '🎲']
+    },
+    { 
+        text: '🌳 Write about a magical tree that grows into space!', 
+        emojis: ['🌳', '✨', '🍃', '🚀']
+    },
+    { 
+        text: '🎪 Write about a mysterious circus that appears in the park!', 
+        emojis: ['🎪', '🎭', '✨', '🌙']
+    }
+];
+
+let currentSpaceAdventurePromptIndex = 0;
+let currentCharacter = 'mordecai';
+
+// Character switching
+document.querySelectorAll('.character-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const character = this.getAttribute('data-character');
+        switchCharacter(character);
+        
+        // Update active button
+        document.querySelectorAll('.character-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        this.classList.add('active');
+    });
+});
+
+function switchCharacter(character) {
+    // Hide all characters
+    document.getElementById('mordecai-avatar').style.display = 'none';
+    document.getElementById('rigby-avatar').style.display = 'none';
+    document.getElementById('highfiveghost-avatar').style.display = 'none';
+    
+    // Show selected character
+    if (character === 'mordecai') {
+        document.getElementById('mordecai-avatar').style.display = 'block';
+        document.getElementById('character-name').textContent = 'Mordecai';
+        document.getElementById('character-message').textContent = 'Ohhhh, ready for some awesome writing!';
+        playSound('mordecai-ohhhh');
+    } else if (character === 'rigby') {
+        document.getElementById('rigby-avatar').style.display = 'block';
+        document.getElementById('character-name').textContent = 'Rigby';
+        document.getElementById('character-message').textContent = 'No way, dude! Let\'s write something epic!';
+        playSound('rigby-no-way');
+    } else if (character === 'highfiveghost') {
+        document.getElementById('highfiveghost-avatar').style.display = 'block';
+        document.getElementById('character-name').textContent = 'High Five Ghost';
+        document.getElementById('character-message').textContent = 'High five! Let\'s write something spooky!';
+        playSound('high-five');
+    }
+    
+    currentCharacter = character;
+}
+
+// Space Adventure Sound Effects
+const spaceAdventureSounds = {
+    'mordecai-ohhhh': 'https://www.myinstants.com/media/sounds/regular-show-ohhhhh.mp3',
+    'rigby-no-way': 'https://www.myinstants.com/media/sounds/rigby-no-way.mp3',
+    'high-five': 'https://www.myinstants.com/media/sounds/high-five.mp3',
+    'regular-show-theme': 'https://www.myinstants.com/media/sounds/regular-show-theme-song.mp3'
+};
+
+function playSound(soundName) {
+    if (spaceAdventureSounds[soundName]) {
+        const audio = new Audio(spaceAdventureSounds[soundName]);
+        audio.volume = 0.5;
+        audio.play();
+    }
+}
+
+// Play Space Adventure theme when tab is opened
+document.getElementById('space-adventure-tab').addEventListener('click', function() {
+    setTimeout(() => {
+        playSound('regular-show-theme');
+    }, 500);
+});
+
+// Space Adventure Topic Generation
+document.getElementById('space-adventure-topic-generate').onclick = function() {
+    currentSpaceAdventurePromptIndex = (currentSpaceAdventurePromptIndex + 1) % spaceAdventurePrompts.length;
+    const currentPrompt = spaceAdventurePrompts[currentSpaceAdventurePromptIndex];
+    
+    const writingPrompt = document.getElementById('space-adventure-writing-prompt');
+    writingPrompt.style.opacity = '0';
+    setTimeout(() => {
+        writingPrompt.innerHTML = currentPrompt.text;
+        writingPrompt.style.opacity = '1';
+    }, 300);
+    
+    // Animate Space Adventure characters
+    const animatorDiv = document.getElementById('space-adventure-animator');
+    animatorDiv.innerHTML = `
+        <div class="space-adventure-character-animation">
+            ${currentPrompt.emojis.map(emoji => 
+                `<span style="display:inline-block; margin:0 10px; animation: float 2s ease-in-out infinite alternate;">${emoji}</span>`
+            ).join('')}
+        </div>
+    `;
+    
+    // Play character sound
+    if (currentCharacter === 'mordecai') {
+        playSound('mordecai-ohhhh');
+    } else if (currentCharacter === 'rigby') {
+        playSound('rigby-no-way');
+    } else if (currentCharacter === 'highfiveghost') {
+        playSound('high-five');
+    }
+};
+
+// Space Adventure Writing Submit
+document.getElementById('space-adventure-writing-submit').onclick = function() {
+    // Trigger Space Adventure themed confetti
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti-piece';
+        confetti.style.position = 'fixed';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.top = '-20px';
+        confetti.style.width = '16px';
+        confetti.style.height = '16px';
+        confetti.style.borderRadius = '50%';
+        confetti.style.background = `hsl(${Math.random()*360},90%,60%)`;
+        confetti.style.zIndex = '9999';
+        confetti.style.pointerEvents = 'none';
+        confetti.style.animation = 'confetti 1.2s linear forwards';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 1300);
+    }
+    
+    // Update Space Adventure character message
+    if (currentCharacter === 'mordecai') {
+        document.getElementById('character-message').textContent = '🦉: Ohhhh, that was totally awesome, dude!';
+        playSound('mordecai-ohhhh');
+    } else if (currentCharacter === 'rigby') {
+        document.getElementById('character-message').textContent = '🦝: No way! That was epic!';
+        playSound('rigby-no-way');
+    } else if (currentCharacter === 'highfiveghost') {
+        document.getElementById('character-message').textContent = '👻: High five! That was spooktacular!';
+        playSound('high-five');
+    }
+    
+    document.getElementById('mordecai-avatar').classList.add('celebration');
+    setTimeout(() => {
+        document.getElementById('mordecai-avatar').classList.remove('celebration');
+    }, 800);
+};
+
+// Space Adventure Save Draft
+document.getElementById('space-adventure-writing-save').onclick = function() {
+    alert('Draft Saved! 🚀');
+    playSound('rigby-no-way');
+};
+
+// Space Adventure Voice Input
+document.getElementById('character-voice').onclick = function() {
+    if (!recognition) {
+        alert('Speech recognition is not supported in your browser. Please try Chrome or Edge.');
+        return;
+    }
+    
+    if (!isRecording) {
+        recognition.start();
+        isRecording = true;
+        document.getElementById('character-voice').innerHTML = '<i class="fas fa-stop"></i> Stop Recording';
+    } else {
+        recognition.stop();
+    }
+};
+
+// Handle Space Adventure voice input
+function handleSpaceAdventureVoiceInput(transcript) {
+    let response;
+    
+    if (currentCharacter === 'mordecai') {
+        response = characterDialogue.mordecai[Math.floor(Math.random() * characterDialogue.mordecai.length)];
+        playSound('mordecai-ohhhh');
+    } else if (currentCharacter === 'rigby') {
+        response = characterDialogue.rigby[Math.floor(Math.random() * characterDialogue.rigby.length)];
+        playSound('rigby-no-way');
+    } else if (currentCharacter === 'highfiveghost') {
+        response = characterDialogue.highfiveghost[Math.floor(Math.random() * characterDialogue.highfiveghost.length)];
+        playSound('high-five');
+    }
+    
+    document.getElementById('character-message').textContent = '🦉: ' + response;
+    document.getElementById('play-character-voice').style.display = 'inline-block';
+}
+
+// Handle Space Adventure play button click
+document.getElementById('play-character-voice').onclick = function() {
+    if ('speechSynthesis' in window) {
+        const response = document.getElementById('character-message').textContent.replace('🦉: ', '');
+        const utterance = new SpeechSynthesisUtterance(response);
+        utterance.rate = 0.9; // Slightly slower for clarity
+        window.speechSynthesis.speak(utterance);
+    }
+};
+
+// Power-ups functionality
+document.querySelectorAll('.activate-power-up').forEach(button => {
+    button.addEventListener('click', function() {
+        const powerUpType = this.closest('.power-up-item').getAttribute('data-power');
+        activatePowerUp(powerUpType);
+    });
+});
+
+function activatePowerUp(powerUpType) {
+    const textArea = document.getElementById('space-adventure-writing-input');
+    let content = textArea.value;
+    
+    if (powerUpType === 'wordboost') {
+        // Add vocabulary words
+        const words = characterVocabulary[currentCharacter];
+        const randomWords = [];
+        for (let i = 0; i < 5; i++) {
+            randomWords.push(words[Math.floor(Math.random() * words.length)]);
+        }
+        
+        const wordList = randomWords.join(', ');
+        content += `\n\nVocabulary boost: ${wordList}`;
+        
+        // Play character sound
+        if (currentCharacter === 'mordecai') {
+            playSound('mordecai-ohhhh');
+        } else if (currentCharacter === 'rigby') {
+            playSound('rigby-no-way');
+        } else if (currentCharacter === 'highfiveghost') {
+            playSound('high-five');
+        }
+    } else if (powerUpType === 'storyidea') {
+        // Add a random story idea
+        const prompt = spaceAdventurePrompts[Math.floor(Math.random() * spaceAdventurePrompts.length)];
+        content += `\n\nStory idea: ${prompt.text}`;
+        
+        // Play character sound
+        if (currentCharacter === 'mordecai') {
+            playSound('mordecai-ohhhh');
+        } else if (currentCharacter === 'rigby') {
+            playSound('rigby-no-way');
+        } else if (currentCharacter === 'highfiveghost') {
+            playSound('high-five');
+        }
+    } else if (powerUpType === 'characterboost') {
+        // Add character dialogue
+        const dialogue = characterStoryElements[currentCharacter].dialogue;
+        const randomDialogue = dialogue[Math.floor(Math.random() * dialogue.length)];
+        content += `\n\nCharacter dialogue: "${randomDialogue}"`;
+        
+        // Play character sound
+        if (currentCharacter === 'mordecai') {
+            playSound('mordecai-ohhhh');
+        } else if (currentCharacter === 'rigby') {
+            playSound('rigby-no-way');
+        } else if (currentCharacter === 'highfiveghost') {
+            playSound('high-five');
+        }
+    }
+    
+    textArea.value = content;
+}
+
+// Adventure elements functionality
+document.querySelectorAll('.generate-element').forEach(button => {
+    button.addEventListener('click', function() {
+        const elementType = this.closest('.adventure-element-item').getAttribute('data-element');
+        generateAdventureElement(elementType);
+    });
+});
+
+function generateAdventureElement(elementType) {
+    const elements = characterStoryElements[currentCharacter][elementType];
+    const randomElement = elements[Math.floor(Math.random() * elements.length)];
+    
+    if (elementType === 'characters') {
+        document.getElementById('character-suggestions').innerHTML = `<p>${randomElement}</p>`;
+    } else if (elementType === 'settings') {
+        document.getElementById('setting-suggestions').innerHTML = `<p>${randomElement}</p>`;
+    } else if (elementType === 'dialogue') {
+        document.getElementById('dialogue-suggestions').innerHTML = `<p>"${randomElement}"</p>`;
+    }
+    
+    // Play character sound
+    if (currentCharacter === 'mordecai') {
+        playSound('mordecai-ohhhh');
+    } else if (currentCharacter === 'rigby') {
+        playSound('rigby-no-way');
+    } else if (currentCharacter === 'highfiveghost') {
+        playSound('high-five');
+    }
+}
+
+// Character quotes functionality
+document.querySelectorAll('.use-quote').forEach(button => {
+    button.addEventListener('click', function() {
+        const quoteText = this.closest('.quote-item').querySelector('.quote-text').textContent;
+        const textArea = document.getElementById('space-adventure-writing-input');
+        textArea.value += `\n\n"${quoteText}"`;
+        
+        // Play character sound
+        if (currentCharacter === 'mordecai') {
+            playSound('mordecai-ohhhh');
+        } else if (currentCharacter === 'rigby') {
+            playSound('rigby-no-way');
+        } else if (currentCharacter === 'highfiveghost') {
+            playSound('high-five');
+        }
+    });
+});
+
+// Writing tools functionality
+document.getElementById('space-adventure-bold').addEventListener('click', function() {
+    const textArea = document.getElementById('space-adventure-writing-input');
+    const start = textArea.selectionStart;
+    const end = textArea.selectionEnd;
+    const text = textArea.value;
+    const selectedText = text.substring(start, end);
+    
+    if (selectedText) {
+        textArea.value = text.substring(0, start) + `**${selectedText}**` + text.substring(end);
+    }
+});
+
+document.getElementById('space-adventure-italic').addEventListener('click', function() {
+    const textArea = document.getElementById('space-adventure-writing-input');
+    const start = textArea.selectionStart;
+    const end = textArea.selectionEnd;
+    const text = textArea.value;
+    const selectedText = text.substring(start, end);
+    
+    if (selectedText) {
+        textArea.value = text.substring(0, start) + `*${selectedText}*` + text.substring(end);
+    }
+});
+
+document.getElementById('space-adventure-underline').addEventListener('click', function() {
+    const textArea = document.getElementById('space-adventure-writing-input');
+    const start = textArea.selectionStart;
+    const end = textArea.selectionEnd;
+    const text = textArea.value;
+    const selectedText = text.substring(start, end);
+    
+    if (selectedText) {
+        textArea.value = text.substring(0, start) + `<u>${selectedText}</u>` + text.substring(end);
+    }
+});
+
+document.getElementById('space-adventure-quote').addEventListener('click', function() {
+    const textArea = document.getElementById('space-adventure-writing-input');
+    const start = textArea.selectionStart;
+    const end = textArea.selectionEnd;
+    const text = textArea.value;
+    const selectedText = text.substring(start, end);
+    
+    if (selectedText) {
+        textArea.value = text.substring(0, start) + `"${selectedText}"` + text.substring(start);
+    } else {
+        textArea.value = text.substring(0, start) + `"${currentCharacter === 'mordecai' ? 'Ohhhh, ' : currentCharacter === 'rigby' ? 'No way, ' : 'High five, '}"` + text.substring(start);
+    }
+});
+
+document.getElementById('space-adventure-emoji').addEventListener('click', function() {
+    const emojis = ['🚀', '👾', '💫', '🌌', '🎸', '⚡', '🎵', '🌟', '👻', '✨', '🌙', '🌍', '🎮', '🎲', '🌳', '🍃', '🎪', '🎭'];
+    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+    
+    const textArea = document.getElementById('space-adventure-writing-input');
+    const start = textArea.selectionStart;
+    const text = textArea.value;
+    
+    textArea.value = text.substring(0, start) + randomEmoji + text.substring(start);
+});
+
+document.getElementById('space-adventure-character').addEventListener('click', function() {
+    const characters = characterStoryElements[currentCharacter].characters;
+    const randomCharacter = characters[Math.floor(Math.random() * characters.length)];
+    
+    const textArea = document.getElementById('space-adventure-writing-input');
+    const start = textArea.selectionStart;
+    const text = textArea.value;
+    
+    textArea.value = text.substring(0, start) + randomCharacter + text.substring(start);
+});
+
+// Parent Portal Tab Functionality
+document.getElementById('parent-portal-tab').addEventListener('click', function() {
+    // Initialize parent portal features
+    updateParentDashboard();
+});
+
+function updateParentDashboard() {
+    // Update progress bars and activity feed
+    // This would be connected to real data in a production environment
+}
+
+// Teacher Portal Tab Functionality
+document.getElementById('teacher-portal-tab').addEventListener('click', function() {
+    // Initialize teacher portal features
+    updateTeacherDashboard();
+});
+
+function updateTeacherDashboard() {
+    // Update class activity and assessment tools
+    // This would be connected to real data in a production environment
+}
 </script>
+<script type="module" src="/static/js/writing_intervention.js"></script>
 {% endblock %} 

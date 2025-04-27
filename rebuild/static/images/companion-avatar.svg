@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <!-- Head -->
+    <circle cx="60" cy="60" r="50" fill="#4CAF50" />
+    
+    <!-- Eyes -->
+    <g id="eyes" class="animate-blink">
+        <circle cx="40" cy="50" r="8" fill="white" />
+        <circle cx="80" cy="50" r="8" fill="white" />
+        <circle cx="40" cy="50" r="4" fill="#333" />
+        <circle cx="80" cy="50" r="4" fill="#333" />
+    </g>
+    
+    <!-- Glasses -->
+    <g id="glasses" fill="none" stroke="#333" stroke-width="2">
+        <circle cx="40" cy="50" r="12" />
+        <circle cx="80" cy="50" r="12" />
+        <line x1="52" y1="50" x2="68" y2="50" />
+    </g>
+    
+    <!-- Smile -->
+    <path id="mouth" 
+          d="M40,75 Q60,90 80,75" 
+          stroke="#333" 
+          stroke-width="3" 
+          fill="none" 
+          class="animate-talk" />
+    
+    <!-- Graduation Cap -->
+    <g id="cap">
+        <path d="M30,30 L90,30 L60,10 Z" fill="#333" />
+        <rect x="45" y="25" width="30" height="10" fill="#333" />
+        <line x1="60" y1="10" x2="60" y2="0" stroke="#333" stroke-width="2" />
+    </g>
+    
+    <style>
+        @keyframes blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+        
+        @keyframes talk {
+            0%, 100% { d: path('M40,75 Q60,90 80,75'); }
+            50% { d: path('M40,75 Q60,80 80,75'); }
+        }
+        
+        .animate-blink {
+            animation: blink 4s infinite;
+            transform-origin: center;
+        }
+        
+        .animate-talk {
+            animation: talk 0.5s infinite;
+        }
+        
+        #cap {
+            transform-origin: center;
+            transition: transform 0.3s ease;
+        }
+        
+        #cap:hover {
+            transform: translateY(-5px) rotate(5deg);
+        }
+    </style>
+    
+    <script>
+        // Add interactivity
+        const avatar = document.querySelector('svg');
+        const cap = document.querySelector('#cap');
+        const mouth = document.querySelector('#mouth');
+        
+        // Toggle talking animation
+        let isTalking = false;
+        avatar.addEventListener('click', () => {
+            isTalking = !isTalking;
+            mouth.classList.toggle('animate-talk', isTalking);
+        });
+        
+        // Celebrate animation
+        function celebrate() {
+            cap.style.transform = 'translateY(-20px) rotate(360deg)';
+            setTimeout(() => {
+                cap.style.transform = '';
+            }, 1000);
+        }
+    </script>
+</svg> 

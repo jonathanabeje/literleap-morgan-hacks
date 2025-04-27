@@ -1,0 +1,346 @@
+/* Writing Intervention System Styles */
+
+/* Learning Companion */
+#companion-avatar {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 16px 4px #ffd60044, 0 2px 8px #1976d244;
+    border: 3px solid #ffd600;
+}
+
+#companion-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#companion-message {
+    min-height: 48px;
+    font-style: italic;
+}
+
+/* Writing Strength Map */
+#strength-map {
+    min-height: 200px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 10px;
+    background: #f0f7fa;
+    border-radius: 1rem;
+    box-shadow: 0 1px 6px rgba(33,150,243,0.07);
+}
+
+.strength-item {
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #fff 60%, #e3f2fd 100%);
+    border: 2px solid #90caf9;
+    color: #1976d2;
+    font-weight: 600;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.strength-item.active {
+    background-color: #e3f2fd;
+    border: 2px solid #2196f3;
+}
+
+.strength-icon {
+    font-size: 2rem;
+    color: #ffd600;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 8px #fffde7;
+}
+
+.strength-item .strength-star {
+    color: #ffd600;
+    font-size: 1.5rem;
+    margin-right: 0.25rem;
+}
+
+/* Story Animator Canvas */
+#story-canvas {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+/* Achievement Progress */
+#achievement-progress {
+    min-height: 150px;
+}
+
+.achievement-level {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+}
+
+.achievement-level.current {
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196f3;
+}
+
+.achievement-level .progress {
+    height: 8px;
+    margin-top: 5px;
+}
+
+/* Writing Analysis */
+#writing-analysis .progress {
+    height: 20px;
+    margin-bottom: 15px;
+    background-color: #e9ecef;
+}
+
+#writing-analysis .progress-bar {
+    transition: width 0.6s ease;
+    background: linear-gradient(90deg, #1976d2 0%, #ffd600 100%);
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Recent Achievements */
+#recent-achievements {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.achievement-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #fff 60%, #e3f2fd 100%);
+    border-left: 6px solid #ffd600;
+    color: #333;
+    font-weight: 600;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.achievement-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.achievement-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #ffd600;
+    color: #fff;
+    font-size: 2rem;
+    box-shadow: 0 2px 8px #fffde7;
+}
+
+.achievement-details {
+    flex: 1;
+}
+
+.achievement-details h5 {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.achievement-details p {
+    margin: 0;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Writing Studio */
+#writing-input {
+    resize: vertical;
+    min-height: 200px;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+#writing-prompt {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #2196f3;
+}
+
+/* Animations */
+@keyframes celebrate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.celebration {
+    animation: bounce-celebrate 0.7s;
+}
+
+/* Confetti animation for celebration */
+@keyframes confetti {
+    0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(300px) rotate(360deg); opacity: 0; }
+}
+.confetti-piece {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: confetti 1.2s linear forwards;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .col-md-3, .col-md-6 {
+        margin-bottom: 20px;
+    }
+    
+    #companion-avatar {
+        width: 80px;
+        height: 80px;
+    }
+    
+    #strength-map {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Voice Interaction */
+#companion-voice {
+    position: relative;
+    overflow: hidden;
+}
+
+#companion-voice.listening::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(33, 150, 243, 0.1);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Level Badge */
+#current-level {
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 20px;
+}
+
+/* Save Draft Button */
+#writing-save {
+    transition: all 0.3s ease;
+}
+
+#writing-save:hover {
+    background-color: #e9ecef;
+}
+
+/* Topic Generator Button */
+#topic-generate {
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+#topic-generate i {
+    margin-right: 4px;
+}
+
+/* Writing Analysis Scores */
+.score-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 2px;
+}
+
+.score-value {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Strength Map Items */
+.strength-example {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* Achievement Progress Levels */
+.level-requirements {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+    padding-left: 15px;
+}
+
+.level-requirements li {
+    margin-bottom: 3px;
+}
+
+/* Story Animation Controls */
+.animation-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.animation-control-btn {
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.animation-control-btn:hover {
+    background-color: #e9ecef;
+}
+
+/* Add color gradients and icons to dashboard cards */
+.card {
+    background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
+    box-shadow: 0 2px 12px rgba(33,150,243,0.08);
+    border-radius: 1.25rem;
+    border: none;
+}
+
+.card h4, .card h3, .card h2 {
+    color: #1976d2;
+    font-weight: 700;
+}
+
+/* Add a little bounce to celebration */
+@keyframes bounce-celebrate {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+.celebration {
+    animation: bounce-celebrate 0.7s;
+} 

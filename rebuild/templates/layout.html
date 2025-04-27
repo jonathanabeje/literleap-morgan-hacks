@@ -175,7 +175,9 @@
     </style>
     
     <!-- Any additional head content -->
-    {% block head %}{% endblock %}
+    {% block head %}
+    <link rel="stylesheet" href="/static/css/regularshow-theme.css">
+    {% endblock %}
 </head>
 <body>
     <!-- Navigation -->
@@ -250,6 +252,17 @@
     </script>
     
     <!-- Page-specific JS -->
-    {% block scripts %}{% endblock %}
+    {% block scripts %}
+    <script src="/static/js/regularshow-theme.js"></script>
+    {% endblock %}
+    
+    <!-- Regular Show Characters in Header -->
+    <div id="rs-characters-header" style="display:flex;justify-content:center;align-items:center;gap:2rem;margin-bottom:1rem;">
+      <img src="https://static.wikia.nocookie.net/theregularshow/images/b/b4/Mordecai_2024.PNG/revision/latest/scale-to-width-down/1200?cb=20240517015548" alt="Mordecai" style="height:60px;">
+      <img src="https://static.wikia.nocookie.net/theregularshow/images/c/ce/Rigby_2024.PNG/revision/latest/scale-to-width-down/1200?cb=20240517015606" alt="Rigby" style="height:60px;">
+      <img src="https://static.wikia.nocookie.net/theregularshow/images/d/dd/Benson_2024.PNG/revision/latest?cb=20240517015624" alt="Benson" style="height:60px;">
+      <img src="https://static.wikia.nocookie.net/theregularshow/images/2/25/Pops_2024.PNG/revision/latest?cb=20240517015637" alt="Pops" style="height:60px;">
+    </div>
+    <!-- End Regular Show Characters in Header -->
 </body>
 </html> 

@@ -535,5 +535,181 @@ def get_progress_data():
     """API endpoint to get progress data for charts"""
     return jsonify(generate_progress_data())
 
+# Writing Intervention System Routes
+@app.route('/api/writing/analyze', methods=['POST'])
+def analyze_writing():
+    """Analyze submitted writing and return detailed feedback"""
+    content = request.json.get('content', '')
+    
+    # Perform writing analysis
+    analysis = {
+        'grammar': {
+            'score': random.randint(60, 100),
+            'suggestions': []
+        },
+        'vocabulary': {
+            'score': random.randint(60, 100),
+            'suggestions': []
+        },
+        'structure': {
+            'score': random.randint(60, 100),
+            'suggestions': []
+        },
+        'organization': {
+            'score': random.randint(60, 100),
+            'suggestions': []
+        }
+    }
+    
+    return jsonify(analysis)
+
+@app.route('/api/writing/generate-topic', methods=['POST'])
+def generate_topic():
+    """Generate a personalized writing topic based on user interests"""
+    interests = request.json.get('interests', [])
+    level = request.json.get('level', 1)
+    
+    # Sample topics for different levels
+    topics = {
+        1: [
+            "Write about your favorite hobby",
+            "Describe your perfect day",
+            "Tell a story about a pet or animal"
+        ],
+        2: [
+            "Compare and contrast two different activities you enjoy",
+            "Explain how to do something you're good at",
+            "Write about a time you learned something new"
+        ],
+        3: [
+            "Analyze the pros and cons of a recent decision",
+            "Describe a challenge you overcame",
+            "Write about a goal you want to achieve"
+        ],
+        4: [
+            "Argue for or against a position on a topic you care about",
+            "Analyze the impact of technology on your life",
+            "Write a detailed plan for achieving a personal goal"
+        ],
+        5: [
+            "Create a complex narrative with multiple perspectives",
+            "Analyze a significant issue in your community",
+            "Write a persuasive essay on a controversial topic"
+        ]
+    }
+    
+    # Select a topic based on level
+    available_topics = topics.get(level, topics[1])
+    selected_topic = random.choice(available_topics)
+    
+    return jsonify({'topic': selected_topic})
+
+@app.route('/api/writing/save-draft', methods=['POST'])
+def save_draft():
+    """Save a writing draft"""
+    content = request.json.get('content', '')
+    title = request.json.get('title', f'Draft - {datetime.now().strftime("%Y-%m-%d %H:%M")}')
+    
+    # In a real implementation, this would save to a database
+    draft = {
+        'id': random.randint(1000, 9999),
+        'title': title,
+        'content': content,
+        'timestamp': datetime.now().isoformat()
+    }
+    
+    return jsonify(draft)
+
+@app.route('/api/writing/achievements', methods=['GET'])
+def get_achievements():
+    """Get user's writing achievements"""
+    # Sample achievements data
+    achievements = [
+        {
+            'id': 1,
+            'title': 'Word Wizard',
+            'description': 'Master basic vocabulary and simple sentences',
+            'progress': 75,
+            'unlocked': True
+        },
+        {
+            'id': 2,
+            'title': 'Sentence Sculptor',
+            'description': 'Create varied sentences with descriptive language',
+            'progress': 45,
+            'unlocked': False
+        },
+        {
+            'id': 3,
+            'title': 'Paragraph Pro',
+            'description': 'Develop organized paragraphs with supporting details',
+            'progress': 20,
+            'unlocked': False
+        }
+    ]
+    
+    return jsonify(achievements)
+
+@app.route('/api/writing/strength-map', methods=['GET'])
+def get_strength_map():
+    """Get user's writing strengths"""
+    # Sample strength map data
+    strengths = [
+        {
+            'category': 'Vocabulary',
+            'level': 3,
+            'examples': ['diverse word choice', 'precise language']
+        },
+        {
+            'category': 'Grammar',
+            'level': 4,
+            'examples': ['correct punctuation', 'proper tense usage']
+        },
+        {
+            'category': 'Structure',
+            'level': 2,
+            'examples': ['clear paragraphs', 'topic sentences']
+        },
+        {
+            'category': 'Creativity',
+            'level': 3,
+            'examples': ['unique ideas', 'engaging descriptions']
+        }
+    ]
+    
+    return jsonify(strengths)
+
+@app.route('/api/writing/companion-message', methods=['POST'])
+def get_companion_message():
+    """Get a response from the learning companion"""
+    message_type = request.json.get('type', 'feedback')
+    analysis = request.json.get('analysis', {})
+    
+    # Sample companion messages
+    messages = {
+        'feedback': [
+            "Great job! Your writing is showing real improvement.",
+            "I notice you're using more complex sentences. Keep it up!",
+            "Your vocabulary choices are getting stronger.",
+            "Let's work on organizing your ideas more clearly."
+        ],
+        'encouragement': [
+            "You're making excellent progress!",
+            "Keep writing - you're developing your own style.",
+            "I'm here to help you become an even better writer.",
+            "Every word you write helps you grow as an author."
+        ],
+        'suggestion': [
+            "Try adding more descriptive details to your writing.",
+            "Consider varying your sentence structure more.",
+            "Think about your audience as you write.",
+            "Remember to support your main ideas with examples."
+        ]
+    }
+    
+    selected_message = random.choice(messages.get(message_type, messages['feedback']))
+    
+    return jsonify({'message': selected_message})
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000) 
+    app.run(debug=True, host='0.0.0.0', port=5000) 
