@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="rw-ascend-header bg-gradient-to-r from-primary-600 to-secondary-600 text-white p-6 rounded-lg shadow-md mb-8">
+    <h1 class="text-3xl font-bold flex items-center gap-2">🦉 ReadWrite Ascend Extension</h1>
+    <p class="mt-2">Personalized, animated, and achievement-driven writing for young learners.</p>
+</div>
+<!-- Extension Navigation (if needed) -->
+<nav class="rw-ascend-nav mb-8">
+    <ul class="flex gap-4">
+        <li><a href="#assessment" class="rw-ascend-link">Assessment</a></li>
+        <li><a href="#strengths" class="rw-ascend-link">Strength Map</a></li>
+        <li><a href="#topics" class="rw-ascend-link">Topics</a></li>
+        <li><a href="#achievements" class="rw-ascend-link">Achievements</a></li>
+        <li><a href="#story-animator" class="rw-ascend-link">Story Animator</a></li>
+        <li><a href="#parent-portal" class="rw-ascend-link">Parent Portal</a></li>
+    </ul>
+</nav>
+<main id="rw-ascend-main">
+    <!-- Dynamic content will be injected here by JS -->
+    <div class="rw-ascend-welcome text-center text-xl text-gray-700 py-12">
+        <p>Welcome to your personalized writing adventure! Select a feature above to get started.</p>
+    </div>
+</main>
+{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='readwrite_ascend_extension/styles.css') }}">
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='readwrite_ascend_extension/main.js') }}"></script>
+{% endblock %} 
